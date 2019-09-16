@@ -3,11 +3,11 @@ from pytube import Playlist
 from pytube import YouTube
 import os
 
-pl = Playlist("https://www.youtube.com/playlist?list=PL4G2bSPE_8umJfOuXxut28OQyIliW2Pfp")
+pl = Playlist("https://www.youtube.com/playlist?list=PLu_matf0Kt_Lm8Al8rz1DClRqf1LA-_X-")
 folder_name = pl.title()
-v = pl.parse_links()
+Video_List = pl.parse_links()
 total_size = 1
-playlistLen = len(v)
+playlistLen = len(Video_List)
 folder_path = ""
 
 
@@ -36,22 +36,21 @@ def get_cnt(cnt):
 folder_path = 'D:/download/' + folder_name
 create_new_folder(folder_path)
 counter = 1
-for x in v:
+for x in Video_List:
     total_size = 1
     try:
         yt = YouTube("https://www.youtube.com/" + x)
         YTitle = yt.title
         yt.register_on_progress_callback(show_progress_bar)
-        yt.streams.filter(progressive=True).first().download(folder_path, filename=(get_cnt(counter) + YTitle))
+        yt.streams.filter().first().download(folder_path, filename=(get_cnt(counter) + YTitle))
         caption = yt.captions.get_by_language_code('en')
-        print(caption.generate_srt_captions())
         if caption:
             my_file = open(folder_path + '/' + get_cnt(counter) + YTitle + ".srt", "w+", encoding='UTF8')
             my_file.writelines(caption.generate_srt_captions())
             my_file.close()
         else:
             print("No Sub Find")
-    except AssertionError as error:
+    except:
         print("Can't Download")
     counter += 1
 
