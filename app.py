@@ -3,7 +3,8 @@ from pytube import Playlist
 from pytube import YouTube
 import os
 
-pl = Playlist("https://www.youtube.com/watch?v=DFwuVPzVUPs&list=PLpGwX4KubWG8KOCRPJQ6snHtmTyxZRgKP")
+playlistURl = input()
+pl = Playlist(playlistURl)
 folder_name = pl.title()
 Video_List = pl.parse_links()
 total_size = 1
@@ -44,15 +45,14 @@ for x in Video_List:
         yt.register_on_progress_callback(show_progress_bar)
         yt.streams.filter().first().download(folder_path, filename=(get_cnt(counter) + YTitle))
         caption = yt.captions.get_by_language_code('en')
-        print(caption.generate_srt_captions())
         if caption:
             my_file = open(folder_path + '/' + get_cnt(counter) + YTitle + ".srt", "w+", encoding='UTF8')
             my_file.writelines(caption.generate_srt_captions())
             my_file.close()
         else:
             print("No Sub Find")
-    except:
-        print("Can't Download")
+    except Exception as e:
+        print("Can't Download"+e)
     counter += 1
 
 print('done')

@@ -65,8 +65,8 @@ class HomePage(GridLayout):
 
 
     def show_progress_bar(self,stream, chunk, file_handle, bytes_remaining):
-        total_size = max(bytes_remaining, self.total_size)
-        self.percentageDownload = int(100 - (bytes_remaining / total_size * 100))
+        self.total_size = max(bytes_remaining, self.total_size)
+        self.percentageDownload = int(100 - (bytes_remaining / self.total_size * 100))
         self.percentageDownload_label.text = f"{self.percentageDownload} %"
         print(f"{self.percentageDownload} %")
         return
