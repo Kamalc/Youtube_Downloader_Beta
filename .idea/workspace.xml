@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="4a421e81-e7cb-45dc-8a4e-8af31fe3cce7" name="Default Changelist" comment="" />
+    <list default="true" id="4a421e81-e7cb-45dc-8a4e-8af31fe3cce7" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app.py" beforeDir="false" afterPath="$PROJECT_DIR$/app.py" afterDir="false" />
+    </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -13,11 +16,47 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/app.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="510">
-              <caret line="15" column="20" selection-start-line="15" selection-start-column="20" selection-end-line="15" selection-end-column="20" />
+            <state relative-caret-position="507">
+              <caret line="21" column="29" lean-forward="true" selection-start-line="21" selection-start-column="29" selection-end-line="21" selection-end-column="29" />
               <folding>
                 <element signature="e#0#27#0" expanded="true" />
               </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="jar://$USER_HOME$/PycharmProjects/YoutubeDownloader/venv/Lib/site-packages/setuptools-40.8.0-py3.7.egg!/setuptools/package_index.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="299">
+              <caret line="556" column="37" lean-forward="true" selection-start-line="556" selection-start-column="37" selection-end-line="556" selection-end-column="37" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$USER_HOME$/PycharmProjects/YoutubeDownloader/venv/Lib/site-packages/pytube/streams.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="298">
+              <caret line="201" selection-start-line="201" selection-end-line="201" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$USER_HOME$/PycharmProjects/YoutubeDownloader/venv/Lib/site-packages/pytube/contrib/playlist.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="2805">
+              <caret line="171" column="52" selection-start-line="171" selection-start-column="39" selection-end-line="171" selection-end-column="52" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$USER_HOME$/PycharmProjects/YoutubeDownloader/venv/Lib/site-packages/pytube/query.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="4658">
+              <caret line="274" column="60" selection-start-line="274" selection-start-column="30" selection-end-line="274" selection-end-column="60" />
             </state>
           </provider>
         </entry>
@@ -42,9 +81,12 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>title</find>
       <find>Youtube</find>
       <find>filesize</find>
+      <find>down</find>
+      <find>download</find>
+      <find>title</find>
+      <find>def download</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -54,6 +96,7 @@
     <option name="CHANGED_PATHS">
       <list>
         <option value="$PROJECT_DIR$/venv/Lib/site-packages/pytube/__main__.py" />
+        <option value="$USER_HOME$/PycharmProjects/YoutubeDownloader/venv/Lib/site-packages/pytube/streams.py" />
         <option value="$PROJECT_DIR$/app.py" />
       </list>
     </option>
@@ -74,8 +117,8 @@
         <subPane>
           <expand>
             <path>
-              <item name="YoutubeDownloader" type="b2602c69:ProjectViewProjectNode" />
-              <item name="YoutubeDownloader" type="462c0819:PsiDirectoryNode" />
+              <item name="Youtube-Downloader-Beta" type="b2602c69:ProjectViewProjectNode" />
+              <item name="Youtube-Downloader-Beta" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
           <select />
@@ -143,19 +186,20 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
+    <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.24973656" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.24973656" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" />
-      <window_info anchor="bottom" id="Run" order="2" weight="0.23726977" />
-      <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
+      <window_info anchor="bottom" id="Run" order="2" weight="0.28060672" />
+      <window_info anchor="bottom" id="Debug" order="3" weight="0.3997833" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="6" />
       <window_info anchor="bottom" id="Version Control" order="7" />
-      <window_info anchor="bottom" id="Terminal" order="8" visible="true" weight="0.32936078" />
+      <window_info anchor="bottom" id="Terminal" order="8" weight="0.32936078" />
       <window_info anchor="bottom" id="Event Log" order="9" side_tool="true" />
       <window_info anchor="bottom" id="Python Console" order="10" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
@@ -185,13 +229,17 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/app.py">
+    <entry file="file://$USER_HOME$/PycharmProjects/YoutubeDownloader/venv/Lib/site-packages/pytube/contrib/playlist.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="510">
-          <caret line="15" column="20" selection-start-line="15" selection-start-column="20" selection-end-line="15" selection-end-column="20" />
-          <folding>
-            <element signature="e#0#27#0" expanded="true" />
-          </folding>
+        <state relative-caret-position="2805">
+          <caret line="171" column="52" selection-start-line="171" selection-start-column="39" selection-end-line="171" selection-end-column="52" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/PycharmProjects/YoutubeDownloader/venv/Lib/site-packages/pytube/query.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="4658">
+          <caret line="274" column="60" selection-start-line="274" selection-start-column="30" selection-end-line="274" selection-end-column="60" />
         </state>
       </provider>
     </entry>
@@ -199,6 +247,30 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="136">
           <caret line="34" column="54" selection-start-line="34" selection-start-column="49" selection-end-line="34" selection-end-column="54" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar://$USER_HOME$/PycharmProjects/YoutubeDownloader/venv/Lib/site-packages/setuptools-40.8.0-py3.7.egg!/setuptools/package_index.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="299">
+          <caret line="556" column="37" lean-forward="true" selection-start-line="556" selection-start-column="37" selection-end-line="556" selection-end-column="37" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/PycharmProjects/YoutubeDownloader/venv/Lib/site-packages/pytube/streams.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="298">
+          <caret line="201" selection-start-line="201" selection-end-line="201" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="507">
+          <caret line="21" column="29" lean-forward="true" selection-start-line="21" selection-start-column="29" selection-end-line="21" selection-end-column="29" />
+          <folding>
+            <element signature="e#0#27#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
