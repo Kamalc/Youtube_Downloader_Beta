@@ -37,7 +37,7 @@ folder_path = 'D:/download/' + folder_name
 create_new_folder(folder_path)
 counter = 1
 for x in v:
-    z = 1
+    total_size = 1
     try:
         yt = YouTube("https://www.youtube.com/" + x)
         YTitle = yt.title
