@@ -1,9 +1,12 @@
 from pytube import Playlist
 from pytube import YouTube
+import  math
 #Play_List_Name = input()
-pl = Playlist("https://www.youtube.com/playlist?list=PLxL5AlqSq21KiW52VGnY72U7Gr8Jlh_bG")
+pl = Playlist("https://www.youtube.com/playlist?list=PLxL5AlqSq21J4ksTlZ8HKbF0py8i43qPW")
 v = pl.parse_links()
 z = 1
+playlistLenth=len(v)
+
 def show_progress_bar(stream, chunk, file_handle, bytes_remaining):
     global z
     z = max(bytes_remaining, z)
@@ -11,7 +14,7 @@ def show_progress_bar(stream, chunk, file_handle, bytes_remaining):
     return  # do work
 def get_cnt(cnt):
     x = ""
-    for i in range (3-len(str(cnt))):
+    for i in range (math.ceil(math.log10(playlistLenth))-len(str(cnt))):
         x += '0'
     return x+str(cnt)+'_'
 
