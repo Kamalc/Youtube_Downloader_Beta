@@ -50,9 +50,10 @@ for x in Video_List:
             my_file.writelines(caption.generate_srt_captions())
             my_file.close()
         else:
-            print("No Sub Find")
+            print("No Sub Found")
     except Exception as e:
-        print("Can't Download"+e)
+        print("Can't Download"+str(e))
+
     counter += 1
 
-print('done')
+print('Process is done')
