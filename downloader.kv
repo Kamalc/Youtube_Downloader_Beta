@@ -1,0 +1,252 @@
+#ScreenManager:
+    #D:
+<Label>
+    font_size: 15
+
+<DownloadPlayList>
+    quality: quality
+    link: link
+    percentage: percentage
+    btn: btn
+    orientation: 'vertical'
+
+    GridLayout:
+        orientation: 'horizontal'
+        size_hint_y: 0.35
+        cols: 3
+        Label:
+            size_hint: 0.2, 0.2
+        Label:
+            size_hint: 0.4, 0.2
+            text: 'Youtube Downloader  | '
+            font_size: 35
+        Label:
+            id: percentage
+            size_hint: 0.2, 0.2
+            text: "0 %"
+            font_size: 20
+    TextInput:
+        id: link
+        size_hint: 1, 0.15
+        multiline: False
+
+    GridLayout:
+        cols: 3
+        orientation: 'vertical'
+        size_hint_y: 0.2
+        Button:
+            id: quality
+            text: '720p, 60'
+            on_parent: dropdown.dismiss()
+            on_release: dropdown.open(self)
+            size_hint_y: None
+            height: '48dp'
+        DropDown
+            id: dropdown
+            #on_parent: self.dismiss()
+            on_select: quality.text = '{}'.format(args[1])
+            Button:
+                text: '720p, 60'
+                size_hint_y: None
+                height: '48dp'
+                on_release: dropdown.select('720p, 60')
+            Button:
+                text: '720p, 30'
+                size_hint_y: None
+                height: '48dp'
+                on_release: dropdown.select('720p, 30')
+            Button:
+                text: '480p'
+                size_hint_y: None
+                height: '48dp'
+                on_release: dropdown.select('480p')
+            Button:
+                text: '360p'
+                size_hint_y: None
+                height: '48dp'
+                on_release: dropdown.select('360p')
+        Button:
+            id: btn
+            text: "Download"
+            on_press: root.start_download_btn()
+    ScrollView:
+        BoxLayout:
+            size_hint_y: None
+            height: root.height * 1
+            orientation:'vertical'
+            color: 0,1,0,1
+            Label:
+                text:'Elements - Lindsey Stirling (Dubstep Violin Original Song)'
+                color: 0,0,0,1
+                canvas.before:
+                    Color:
+                        rgba: 0.13, 0.55, 0.20, 1
+                    Rectangle:
+                        pos: self.pos
+                        size: self.size
+            Label:
+                text:"Would Jose Mourinho & Paul Pogba turn Real Madrid's fortunes around? | La Liga"
+                canvas.before:
+                    Color:
+                        rgba: 0.75, 0.28, 0.31, 1
+                    Rectangle:
+                        pos: self.pos
+                        size: self.size
+            Label:
+                text:'بلورة - ليندسي ستيرلينغ (دوبستيب كلمات الكمان الأصلي)'
+                canvas.before:
+                    Color:
+                        rgba: 0.13, 0.55, 0.20, 1
+                    Rectangle:
+                        pos: self.pos
+                        size: self.size
+            Label:
+                text:'[NEW] Installing Kivy & Kivy Designer in less than 5 Minutes! [VERY EASY]'
+                canvas.before:
+                    Color:
+                        rgba: 0.75, 0.28, 0.31, 1
+                    Rectangle:
+                        pos: self.pos
+                        size: self.size
+            Label:
+                text:'Santa Baby - Lindsey Stirling'
+                canvas.before:
+                    Color:
+                        rgba: 0.75, 0.28, 0.31, 1
+                    Rectangle:
+                        pos: self.pos
+                        size: self.size
+            Label:
+                text:"Lindsey Stirling - Love's Just A Feeling feat. Rooty"
+                canvas.before:
+                    Color:
+                        rgba: 0.75, 0.28, 0.31, 1
+                    Rectangle:
+                        pos: self.pos
+                        size: self.size
+            Label:
+                text:'Minimal Beat - Lindsey Stirling (Original Song)'
+                canvas.before:
+                    Color:
+                        rgba: 0.75, 0.28, 0.31, 1
+                    Rectangle:
+                        pos: self.pos
+                        size: self.size
+            Label:
+                text:'Elements - Lindsey Stirling (Dubstep Violin Original Song)'
+                color: 0,0,0,1
+                canvas.before:
+                    Color:
+                        rgba: 0.13, 0.55, 0.20, 1
+                    Rectangle:
+                        pos: self.pos
+                        size: self.size
+            Label:
+                text:"Would Jose Mourinho & Paul Pogba turn Real Madrid's fortunes around? | La Liga"
+                canvas.before:
+                    Color:
+                        rgba: 0.75, 0.28, 0.31, 1
+                    Rectangle:
+                        pos: self.pos
+                        size: self.size
+            Label:
+                text:'بلورة - ليندسي ستيرلينغ (دوبستيب كلمات الكمان الأصلي)'
+                canvas.before:
+                    Color:
+                        rgba: 0.13, 0.55, 0.20, 1
+                    Rectangle:
+                        pos: self.pos
+                        size: self.size
+            Label:
+                text:'[NEW] Installing Kivy & Kivy Designer in less than 5 Minutes! [VERY EASY]'
+                canvas.before:
+                    Color:
+                        rgba: 0.13, 0.55, 0.20, 1
+                    Rectangle:
+                        pos: self.pos
+                        size: self.size
+            Label:
+                text:'Santa Baby - Lindsey Stirling'
+                canvas.before:
+                    Color:
+                        rgba: 0.13, 0.55, 0.20, 1
+                    Rectangle:
+                        pos: self.pos
+                        size: self.size
+            Label:
+                text:"Lindsey Stirling - Love's Just A Feeling feat. Rooty"
+                canvas.before:
+                    Color:
+                        rgba: 0.13, 0.55, 0.20, 1
+                    Rectangle:
+                        pos: self.pos
+                        size: self.size
+            Label:
+                text:'Minimal Beat - Lindsey Stirling (Original Song)'
+                canvas.before:
+                    Color:
+                        rgba: 0.09, 0.07, 0.13, 1
+                    Rectangle:
+                        pos: self.pos
+                        size: self.size
+            Label:
+                text:'Elements - Lindsey Stirling (Dubstep Violin Original Song)'
+                color: 0,0,0,1
+                canvas.before:
+                    Color:
+                        rgba: 0.13, 0.55, 0.20, 1
+                    Rectangle:
+                        pos: self.pos
+                        size: self.size
+            Label:
+                text:"Would Jose Mourinho & Paul Pogba turn Real Madrid's fortunes around? | La Liga"
+                canvas.before:
+                    Color:
+                        rgba: 0.13, 0.55, 0.20, 1
+                    Rectangle:
+                        pos: self.pos
+                        size: self.size
+            Label:
+                text:'بلورة - ليندسي ستيرلينغ (دوبستيب كلمات الكمان الأصلي)'
+                canvas.before:
+                    Color:
+                        rgba: 0.13, 0.55, 0.20, 1
+                    Rectangle:
+                        pos: self.pos
+                        size: self.size
+            Label:
+                text:'[NEW] Installing Kivy & Kivy Designer in less than 5 Minutes! [VERY EASY]'
+                canvas.before:
+                    Color:
+                        rgba: 0.13, 0.55, 0.20, 1
+                    Rectangle:
+                        pos: self.pos
+                        size: self.size
+            Label:
+                text:'Santa Baby - Lindsey Stirling'
+                canvas.before:
+                    Color:
+                        rgba: 0.13, 0.55, 0.20, 1
+                    Rectangle:
+                        pos: self.pos
+                        size: self.size
+            Label:
+                text:"Lindsey Stirling - Love's Just A Feeling feat. Rooty"
+                canvas.before:
+                    Color:
+                        rgba: 0.13, 0.55, 0.20, 1
+                    Rectangle:
+                        pos: self.pos
+                        size: self.size
+            Label:
+                text:'Minimal Beat - Lindsey Stirling (Original Song)'
+                canvas.before:
+                    Color:
+                        rgba: 0.13, 0.55, 0.20, 1
+                    Rectangle:
+                        pos: self.pos
+                        size: self.size
+
+    #Label:
+    #    size_hint: 1, 0.1
+    #    text: 'Label2'
