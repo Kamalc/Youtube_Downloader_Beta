@@ -11,6 +11,7 @@ total_size = 1
 playlistLen = len(Video_List)
 folder_path = ""
 
+print(folder_name)
 
 def create_new_folder(directory):
     try:
@@ -42,15 +43,17 @@ for x in Video_List:
     try:
         yt = YouTube("https://www.youtube.com/" + x)
         YTitle = yt.title
-        yt.register_on_progress_callback(show_progress_bar)
-        yt.streams.filter().first().download(folder_path, filename=(get_cnt(counter) + YTitle))
-        caption = yt.captions.get_by_language_code('en')
+        #yt.register_on_progress_callback(show_progress_bar)
+        #yt.streams.filter().first().download(folder_path, filename=(get_cnt(counter) + YTitle))
+        ll = [stream.resolution for stream in yt.streams.all()]
+        print(ll)
+        """caption = yt.captions.get_by_language_code('en')
         if caption:
             my_file = open(folder_path + '/' + get_cnt(counter) + YTitle + ".srt", "w+", encoding='UTF8')
             my_file.writelines(caption.generate_srt_captions())
             my_file.close()
         else:
-            print("No Sub Found")
+            print("No Sub Found")"""
     except Exception as e:
         print("Can't Download"+str(e))
 

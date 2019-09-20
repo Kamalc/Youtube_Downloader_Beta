@@ -47,12 +47,8 @@ class HomePage(GridLayout):
 
     def start_download(self, instance):
         if self.V_link.text:
-            if not self.playlist:
-                download = Thread(target=self.downloadV_button)
-                print("DownloadingVideo")
-            else:
-                download = Thread(target=self.downloadPL_button)
-                print("DownloadingPlayList")
+            download = Thread(target=self.downloadV_button)
+            print("DownloadingVideo")
             download.start()
         else:
             print("No input to download")
@@ -66,7 +62,7 @@ class HomePage(GridLayout):
     def downloadV_button(self):
         video_link = YouTube(self.V_link.text)
         video_link.register_on_progress_callback(self.show_progress_bar)
-        video_link.streams.filter(progressive=True).first().download('D:/download')
+        video_link.streams.filter(only_audio=True).first().download('D:/download')
 
     def show_progress_bar(self,stream, chunk, file_handle, bytes_remaining):
         self.total_size = max(bytes_remaining, self.total_size)
