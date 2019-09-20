@@ -1,10 +1,7 @@
 from kivy.app import App
-from kivy.uix.screenmanager import Screen, ScreenManager
 from kivy.properties import ObjectProperty
 from kivy.uix.boxlayout import BoxLayout
 from kivy.config import Config
-from kivy.clock import mainthread
-from kivy.uix.button import Button
 from kivy.core.window import Window
 from pytube import Playlist
 from pytube import YouTube
@@ -12,9 +9,8 @@ from pytube.compat import unicode
 import math
 import re
 import os
-from MApps.MergeVA import MergeVA
 from threading import Thread
-
+from Youtube_Downloader_Beta.MergeVA import MergeVA
 
 # ---- Windows Settings UI ---------------------------
 Window.clearcolor = (0.17, 0.17, 0.17, 1)

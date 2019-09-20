@@ -1,7 +1,7 @@
 from subprocess import run
 
 
-class MergeVA():
+class MergeVA:
     def __init__(self):
         pass
 
