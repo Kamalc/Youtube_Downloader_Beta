@@ -5,7 +5,7 @@ class MergeVA:
     def __init__(self):
         pass
 
-    def merge_va(temp_full_video_path, temp_full_audio_path, full_video_path):
+    def merge_va(self, temp_full_video_path, temp_full_audio_path, full_video_path):
         try:
             run([
                         r".\ffmpeg\bin\ffmpeg.exe",

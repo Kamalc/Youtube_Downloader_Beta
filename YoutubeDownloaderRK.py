@@ -10,7 +10,7 @@ import math
 import re
 import os
 from threading import Thread
-from Youtube_Downloader_Beta.MergeVA import MergeVA
+from MergeVA import MergeVA
 
 # ---- Windows Settings UI ---------------------------
 Window.clearcolor = (0.17, 0.17, 0.17, 1)
@@ -60,10 +60,9 @@ class DownloadPlayList(BoxLayout):
         playlist_url = self.link.text
         if playlist_url:
             pl = Playlist(playlist_url)
-            folder_name = pl.title()
+            folder_name = self.safe_filename(pl.title())
             video_list = pl.parse_links()
             self.playlistLen = len(video_list)
-
             self.folder_path = 'D:/download/' + folder_name
 
             self.create_new_folder(self.folder_path)
@@ -83,7 +82,7 @@ class DownloadPlayList(BoxLayout):
                     file_extension_video = sss[0]
                     sss = [stream.subtype for stream in yt.streams.filter(adaptive=True, only_audio=True).all()]
                     file_extension_audio = sss[0]
-                    MergeVA.merge_va(f"{self.folder_path}/{video_path}.{file_extension_video}",
+                    MergeVA.merge_va(isinstance, f"{self.folder_path}/{video_path}.{file_extension_video}",
                                      f"{self.folder_path}/{audio_path}.{file_extension_audio}",
                                      f"{self.folder_path}/{video_name}.mkv")
                     os.remove(f"{self.folder_path}/{video_path}.{file_extension_video}")
