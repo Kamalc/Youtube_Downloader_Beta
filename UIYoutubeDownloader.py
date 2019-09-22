@@ -1,23 +1,28 @@
+import os
+import math
+from MergeVA import MergeVA
+import re
+from pytube import Playlist
+from pytube import YouTube
+from pytube.compat import unicode
+from threading import Thread
+from kivy.config import Config
 from kivy.app import App
 from kivy.uix.label import Label
 from kivy.uix.button import Button
 from kivy.uix.textinput import TextInput
 from kivy.uix.gridlayout import GridLayout
+from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.dropdown import DropDown
 from kivy.uix.screenmanager import Screen, ScreenManager
 from kivy.core.window import Window
-from pytube import Playlist
-from pytube import YouTube
-from pytube.compat import unicode
-from threading import Thread
-import os
-import math
-from MergeVA import MergeVA
-import re
 
-Window.size = (500, 250)
+Config.set('graphics', 'resizable', False)
+Window.clearcolor = (0.17, 0.17, 0.17, 1)
+Window.size = (600, 400)
 
 
-class HomePage(GridLayout):
+class HomePage(BoxLayout):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
     # ............................Default Variables...........................
@@ -28,34 +33,58 @@ class HomePage(GridLayout):
         self.folder_path = ""
     # ........................................................................
     # UI Design
+        self.orientation, self.font_size, self.spacing, self.padding = 'vertical', 15, 5, 5
+
         self.upperGrid = GridLayout()
-        self.upperGrid.cols = 2
+        self.upperGrid.orientation = 'horizontal'
+        self.upperGrid.cols = 3
+        self.upperGrid.size_hint_y = 0.35
 
-        self.upperGrid.add_widget(Label(text="PlayList Link:"))
-
-        self.PL_link = TextInput(multiline=False)
-        self.upperGrid.add_widget(self.PL_link)
-
-        self.upperGrid.add_widget(Label(text="Video Link:"))
-
-        self.V_link = TextInput(multiline=False)
-        self.upperGrid.add_widget(self.V_link)
-
+        self.upperGrid.add_widget(Label(text="", size_hint_x=0.2,
+                                        size_hint_y=0.2))
+        self.upperGrid.add_widget(Label(text="Youtube Downloader |",
+                                        font_size=35,
+                                        size_hint_x=0.4, size_hint_y=.2))
+        self.percentageDownload_label = Label(text=f"{self.percentageDownload} %",
+                                              font_size=20,
+                                              size_hint_x=0.2, size_hint_y=0.2)
+        self.upperGrid.add_widget(self.percentageDownload_label)
         self.add_widget(self.upperGrid)
-        self.cols, self.padding, self.spacing = 1, 10, 5
+
+        self.play_link = TextInput(multiline=False, size_hint_y=0.13)
+        self.add_widget(self.play_link)
+
+        self.midGrid = GridLayout()
+        self.add_widget(self.midGrid)
+        self.midGrid.cols, self.midGrid.orientation = 3, 'vertical'
+        self.midGrid.size_hint_y = 0.2
+        self.q_drop_down = DropDown()
+
+        self.quality = Button(text='Quality', size_hint=(None, None), height='48dp')
+        self.quality.bind(on_release=self.q_drop_down.open)
+        self.quality.bind(on_press=self.creating_drop_down)
+        self.q_drop_down.bind(on_select=lambda instance, q: setattr(self.quality, 'text', q))
+
+        self.midGrid.add_widget(self.quality)
 
         self.v_download = Button(text="Download")
         self.v_download.bind(on_press=self.start_download)
-        self.add_widget(self.v_download)
+        self.midGrid.add_widget(self.v_download)
 
-        self.add_widget(Label())
-        self.percentageDownload_label = Label(text=f"{self.percentageDownload} %", font_size='80sp')
-        self.add_widget(self.percentageDownload_label)
+        self.lowerGrid = GridLayout()
+        self.lowerGrid.cols, self.lowerGrid.size_y = 1, 0.6
+
+        self.add_widget(self.lowerGrid)
+
     # ...............................................................................
     # # -- Event Functions -- # #
 
+    def on_select(self, instance):
+        pass
+     #self.quality.text = '{}'.format(args[1])
+
     def start_download(self, instance):
-        if self.PL_link.text:
+        if self.play_link.text:
             download = Thread(target=self.downloadPL_button)
             print("DownloadingVideo")
             download.start()
@@ -63,8 +92,24 @@ class HomePage(GridLayout):
             print("No input to download")
     # # ---- Functions ---- # #
 
+    def creating_drop_down(self, instance, qualities=[]):
+        playlist_url = self.play_link.text
+        if playlist_url:
+            pl = Playlist(playlist_url)
+            video_list = pl.parse_links()
+            yt = YouTube("https://www.youtube.com/" + video_list[0])
+            res = {stream.resolution for stream in yt.streams.filter(adaptive=True, only_video=True).all()}
+            qualities = res
+            print(qualities)
+
+        self.q_drop_down.clear_widgets()
+        for quality in qualities:
+            btn = Button(text=quality, size_hint_y=None, height=48)
+            btn.bind(on_release=lambda btn: self.q_drop_down.select(btn.text))
+            self.q_drop_down.add_widget(btn)
+
     def downloadPL_button(self):
-        playlist_url = self.PL_link.text
+        playlist_url = self.play_link.text
         if playlist_url:
             pl = Playlist(playlist_url)
             folder_name = self.safe_filename(pl.title())
@@ -79,7 +124,7 @@ class HomePage(GridLayout):
                 try:
                     yt = YouTube("https://www.youtube.com/" + x)
                     y_title = self.safe_filename(yt.title)
-                    yt.register_on_progress_callback(self.show_progress_bar)
+                    #yt.register_on_progress_callback(self.show_progress_bar)
                     video_name = self.get_cnt(counter) + y_title
                     video_path = video_name + "_v"
                     audio_path = video_name + "_a"
@@ -146,6 +191,8 @@ class HomePage(GridLayout):
 
         filename = regex.sub('', s)
         return unicode(filename[:max_length].rsplit(' ', 0)[0])
+
+
 
 class YoutubeDownloader(App):
     def build(self):
