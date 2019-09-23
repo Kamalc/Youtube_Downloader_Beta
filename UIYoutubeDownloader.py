@@ -31,7 +31,8 @@ class HomePage(BoxLayout):
         self.playlist = False
         self.playlistLen = 0
         self.folder_path = ""
-    # ........................................................................
+        self.playlist_url_dp = ""
+        # ........................................................................
     # UI Design
         self.orientation, self.font_size, self.spacing, self.padding = 'vertical', 15, 5, 5
 
@@ -58,14 +59,31 @@ class HomePage(BoxLayout):
         self.add_widget(self.midGrid)
         self.midGrid.cols, self.midGrid.orientation = 3, 'vertical'
         self.midGrid.size_hint_y = 0.2
-        self.q_drop_down = DropDown()
+        self.q_drop_down_max = DropDown()
+        self.q_drop_down_min = DropDown()
 
-        self.quality = Button(text='Quality', size_hint=(None, None), height='48dp')
-        self.quality.bind(on_release=self.q_drop_down.open)
-        self.quality.bind(on_press=self.creating_drop_down)
-        self.q_drop_down.bind(on_select=lambda instance, q: setattr(self.quality, 'text', q))
+        self.max_qualities = ['2160p', '1440p', '1080p', '720p', '480p', '360', '240p', '144p']
+        self.min_qualities = self.max_qualities[::-1]
 
-        self.midGrid.add_widget(self.quality)
+        self.quality_max = Button(text='Quality', size_hint=(None, None), height='48dp')
+        self.quality_max.bind(on_release=self.q_drop_down_max.open)
+        self.quality_max.bind(on_press=self.creating_drop_down)
+        self.q_drop_down_max.bind(on_select=lambda instance, q: setattr(self.quality_max, 'text', q))
+        for quality in self.max_qualities:
+            btn1 = Button(text=quality, size_hint_y=None, height=48)
+            btn1.bind(on_release=lambda btn1: self.q_drop_down_max.select(btn1.text))
+            self.q_drop_down_max.add_widget(btn1)
+        self.midGrid.add_widget(self.quality_max)
+
+        self.quality_min = Button(text='Quality', size_hint=(None, None), height='48dp')
+        self.quality_min.bind(on_release=self.q_drop_down_min.open)
+        self.quality_min.bind(on_press=self.creating_drop_down)
+        self.q_drop_down_min.bind(on_select=lambda instance, q: setattr(self.quality_min, 'text', q))
+        for quality in self.min_qualities:
+            btn2 = Button(text=quality, size_hint_y=None, height=48)
+            btn2.bind(on_release=lambda btn2: self.q_drop_down_min.select(btn2.text))
+            self.q_drop_down_min.add_widget(btn2)
+        self.midGrid.add_widget(self.quality_min)
 
         self.v_download = Button(text="Download")
         self.v_download.bind(on_press=self.start_download)
@@ -93,20 +111,27 @@ class HomePage(BoxLayout):
     # # ---- Functions ---- # #
 
     def creating_drop_down(self, instance, qualities=[]):
-        playlist_url = self.play_link.text
-        if playlist_url:
-            pl = Playlist(playlist_url)
-            video_list = pl.parse_links()
-            yt = YouTube("https://www.youtube.com/" + video_list[0])
-            res = {stream.resolution for stream in yt.streams.filter(adaptive=True, only_video=True).all()}
-            qualities = res
-            print(qualities)
 
-        self.q_drop_down.clear_widgets()
-        for quality in qualities:
-            btn = Button(text=quality, size_hint_y=None, height=48)
-            btn.bind(on_release=lambda btn: self.q_drop_down.select(btn.text))
-            self.q_drop_down.add_widget(btn)
+        """playlist_url = self.play_link.text
+        if playlist_url is not self.playlist_url_dp:
+            self.playlist_url_dp = playlist_url
+            if playlist_url:
+                pl = Playlist(playlist_url)
+                video_list = pl.parse_links()
+                yt = YouTube("https://www.youtube.com/" + video_list[0])
+                res = {stream.resolution for stream in yt.streams.filter(adaptive=True, only_video=True).all()}
+                #ress = yt.streams.filter(adaptive=True, only_audio=True).all()
+                qualities = res
+                print(res)
+
+                self.q_drop_down.clear_widgets()
+                for quality in qualities:
+                    btn = Button(text=quality, size_hint_y=None, height=48)
+                    btn.bind(on_release=lambda btn: self.q_drop_down.select(btn.text))
+                    self.q_drop_down.add_widget(btn)
+                return True
+        else:
+            return False"""
 
     def downloadPL_button(self):
         playlist_url = self.play_link.text
@@ -124,18 +149,34 @@ class HomePage(BoxLayout):
                 try:
                     yt = YouTube("https://www.youtube.com/" + x)
                     y_title = self.safe_filename(yt.title)
-                    #yt.register_on_progress_callback(self.show_progress_bar)
+                    yt.register_on_progress_callback(self.show_progress_bar)
                     video_name = self.get_cnt(counter) + y_title
                     video_path = video_name + "_v"
                     audio_path = video_name + "_a"
+
+                    mx_idx = self.max_qualities.index(self.quality_max.text)
+                    mn_idx = self.max_qualities.index(self.quality_min.text)
+
+                    file_extension_video = ""
+
+                    for i in range(mx_idx, mn_idx):
+                        try:
+                            yt.streams.filter(adaptive=True, res=self.max_qualities[i]).first().\
+                                download(self.folder_path, filename=video_path)
+                            sss = [stream.subtype for stream in
+                                   yt.streams.filter(adaptive=True, res=self.max_qualities[i]).all()]
+                            file_extension_video = sss[0]
+                            break
+                        except Exception as e:
+                            #i += 1
+                            print(f"Quality doesn't exist'|  {e}  |Quality:{self.max_qualities[i]}")
+
                     yt.streams.filter(adaptive=True, only_audio=True).first().download(self.folder_path,
                                                                                        filename=audio_path)
-                    yt.streams.filter(adaptive=True).first().download(self.folder_path, filename=video_path)
+                    sss2 = [stream.subtype for stream in yt.streams.filter(adaptive=True, only_audio=True).all()]
+                    print(sss2)
+                    file_extension_audio = sss2[0]
 
-                    sss = [stream.subtype for stream in yt.streams.filter(adaptive=True).all()]
-                    file_extension_video = sss[0]
-                    sss = [stream.subtype for stream in yt.streams.filter(adaptive=True, only_audio=True).all()]
-                    file_extension_audio = sss[0]
                     MergeVA.merge_va(isinstance, f"{self.folder_path}/{video_path}.{file_extension_video}",
                                      f"{self.folder_path}/{audio_path}.{file_extension_audio}",
                                      f"{self.folder_path}/{video_name}.mkv")
