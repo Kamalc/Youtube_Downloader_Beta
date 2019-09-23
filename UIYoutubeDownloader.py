@@ -16,6 +16,7 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.dropdown import DropDown
 from kivy.uix.screenmanager import Screen, ScreenManager
 from kivy.core.window import Window
+from Downloader import Downloader
 
 Config.set('graphics', 'resizable', False)
 Window.clearcolor = (0.17, 0.17, 0.17, 1)
@@ -102,8 +103,10 @@ class HomePage(BoxLayout):
      #self.quality.text = '{}'.format(args[1])
 
     def start_download(self, instance):
+        downloader = Downloader(self.percentageDownload_label)
         if self.play_link.text:
-            download = Thread(target=self.downloadPL_button)
+            download = Thread(target=downloader.playlist_download,
+                              args=(self.play_link.text, 'D:/download/', self.quality_max.text, self.quality_min.text))
             print("DownloadingVideo")
             download.start()
         else:
