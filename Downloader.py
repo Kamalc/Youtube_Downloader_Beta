@@ -6,6 +6,8 @@ from pytube import Playlist
 from pytube import YouTube
 from pytube.compat import unicode
 from kivy.uix.label import Label
+import arabic_reshaper
+import bidi.algorithm
 
 class Downloader:
     def __init__(self, percentage_download_label, viewer_video):
@@ -46,10 +48,12 @@ class Downloader:
                     mn_idx = self.max_qualities.index(quality_min)
 
                     # ---- Adding Label of Video Title --------
-                    test = f"{counter}. {y_title}   "
+                    test = f" {y_title}   "
                     print(test)
-                    video_label = Label(text=test, color=(1, 0.5, 1, 1),
-                        size_hint_y=None, height=60, halign="left", valign="middle")
+                    reshaped_text = arabic_reshaper.reshape(test)
+                    display_text = bidi.algorithm.get_display(reshaped_text)
+                    video_label = Label(text=f"{counter}. {display_text}", color=(1, 0.5, 1, 1),
+                        size_hint_y=None, height=60, halign="left", valign="middle", font_name='Arial')
                     video_label.bind(size=video_label.setter('text_size'))
                     self.viewerVideo.height += video_label.height*2
                     self.viewerVideo.add_widget(video_label)
