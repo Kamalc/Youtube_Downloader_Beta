@@ -5,10 +5,10 @@ import re
 from pytube import Playlist
 from pytube import YouTube
 from pytube.compat import unicode
-
+from kivy.uix.label import Label
 
 class Downloader:
-    def __init__(self, percentage_download_label):
+    def __init__(self, percentage_download_label, viewer_video):
         self.playlistLen = 0
         self.folder_path = ""
         self.total_size = 1
@@ -16,7 +16,10 @@ class Downloader:
         self.min_qualities = self.max_qualities[::-1]
         self.percentageDownload = 0
         self.percentageDownload_label = percentage_download_label
-        pass
+        self.viewerVideo = viewer_video
+        self.video_label2 = Label(text="0 %", color=(0.5, 0.5, 0.5, 1),
+                                         size_hint_y=None, height=40,
+                                 halign="right", valign="middle")
 
     def playlist_download(self, play_list_link, folder_path, quality_max, quality_min):
         self.folder_path = folder_path
@@ -42,9 +45,24 @@ class Downloader:
                     mx_idx = self.max_qualities.index(quality_max)
                     mn_idx = self.max_qualities.index(quality_min)
 
+                    # ---- Adding Label of Video Title --------
+                    test = f"{counter}. {y_title}   "
+                    print(test)
+                    video_label = Label(text=test, color=(1, 0.5, 1, 1),
+                        size_hint_y=None, height=60, halign="left", valign="middle")
+                    video_label.bind(size=video_label.setter('text_size'))
+                    self.viewerVideo.height += video_label.height*2
+                    self.viewerVideo.add_widget(video_label)
+                    test2 = f"0 %"
+                    self.video_label2 = Label(text=test2, color=(0.5, 0.5, 0.5, 1),
+                                         size_hint_y=None, height=40, halign="right", valign="middle")
+                    self.video_label2.bind(size=self.video_label2.setter('text_size'))
+                    self.viewerVideo.add_widget(self.video_label2)
+                    # ---------------------------------------------------
+
                     file_extension_video = ""
 
-                    for i in range(mx_idx, mn_idx):
+                    """for i in range(mx_idx, mn_idx):
                         try:
                             yt.streams.filter(adaptive=True, res=self.max_qualities[i]).first(). \
                                 download(self.folder_path, filename=video_path)
@@ -66,7 +84,12 @@ class Downloader:
                                      f"{self.folder_path}/{audio_path}.{file_extension_audio}",
                                      f"{self.folder_path}/{video_name}.mkv")
                     os.remove(f"{self.folder_path}/{video_path}.{file_extension_video}")
-                    os.remove(f"{self.folder_path}/{audio_path}.{file_extension_audio}")
+                    os.remove(f"{self.folder_path}/{audio_path}.{file_extension_audio}")"""
+
+                    # ---- Changing Label Color if Video is downloaded --------
+                    video_label.color = (0.13, 0.83, 0.25, 1)
+                    # ---------------------------------------------------------
+
                     caption = yt.captions.get_by_language_code('en')
                     if caption:
                         my_file = open(self.folder_path + '/' + self.get_cnt(counter) + y_title + ".srt", "w+",
@@ -77,7 +100,9 @@ class Downloader:
                         print("No Sub Found")
                 except Exception as e:
                     print("Can't Download: " + str(e))
-
+                    # ---- Changing Label Color if Video is not downloaded ----
+                    video_label.color = (1, 0, 0, 1)
+                    # ---------------------------------------------------------
                 counter += 1
 
     def download_video(self):
@@ -89,6 +114,7 @@ class Downloader:
         self.total_size = max(bytes_remaining, self.total_size)
         self.percentageDownload = int(100 - (bytes_remaining / self.total_size * 100))
         self.percentageDownload_label.text = f"{self.percentageDownload} %"
+        self.video_label2.text = f"{self.percentageDownload} %"
         print(f"{self.percentageDownload} %")
         return
 

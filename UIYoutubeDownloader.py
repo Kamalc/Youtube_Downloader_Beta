@@ -14,6 +14,8 @@ from kivy.uix.textinput import TextInput
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.dropdown import DropDown
+from kivy.uix.scrollview import ScrollView
+from kivy.graphics import Color, Rectangle
 from kivy.uix.screenmanager import Screen, ScreenManager
 from kivy.core.window import Window
 from Downloader import Downloader
@@ -33,6 +35,7 @@ class HomePage(BoxLayout):
         self.playlistLen = 0
         self.folder_path = ""
         self.playlist_url_dp = ""
+        #self.download = Thread()
         # ........................................................................
     # UI Design
         self.orientation, self.font_size, self.spacing, self.padding = 'vertical', 15, 5, 5
@@ -40,7 +43,7 @@ class HomePage(BoxLayout):
         self.upperGrid = GridLayout()
         self.upperGrid.orientation = 'horizontal'
         self.upperGrid.cols = 3
-        self.upperGrid.size_hint_y = 0.35
+        self.upperGrid.size_hint_y = 0.30
 
         self.upperGrid.add_widget(Label(text="", size_hint_x=0.2,
                                         size_hint_y=0.2))
@@ -59,7 +62,9 @@ class HomePage(BoxLayout):
         self.midGrid = GridLayout()
         self.add_widget(self.midGrid)
         self.midGrid.cols, self.midGrid.orientation = 3, 'vertical'
-        self.midGrid.size_hint_y = 0.2
+        self.midGrid.size_hint_y = 0.21
+        self.midGrid.canvas.before
+
         self.q_drop_down_max = DropDown()
         self.q_drop_down_min = DropDown()
 
@@ -90,51 +95,52 @@ class HomePage(BoxLayout):
         self.v_download.bind(on_press=self.start_download)
         self.midGrid.add_widget(self.v_download)
 
-        self.lowerGrid = GridLayout()
-        self.lowerGrid.cols, self.lowerGrid.size_y = 1, 0.6
+        self.scroll = ScrollView()
 
-        self.add_widget(self.lowerGrid)
+        self.viewerVideo = GridLayout(cols=2, size_hint_y=None, spacing=10, height=600)
+
+        self.scroll.add_widget(self.viewerVideo)
+
+        self.add_widget(self.scroll)
+
+        self.lower_grid = GridLayout(cols=2, size_hint_y=0.1)
+        self.clear_btn = Button(text="Clear")
+        self.clear_btn.bind(on_press=self.clear_viewer)
+        self.stop_btn = Button(text="Stop Download")
+        #self.stop_btn.bind(on_press=self.download.join())
+        self.lower_grid.add_widget(self.clear_btn)
+        self.lower_grid.add_widget(self.stop_btn)
+
+        self.add_widget(self.lower_grid)
 
     # ...............................................................................
     # # -- Event Functions -- # #
 
     def on_select(self, instance):
         pass
-     #self.quality.text = '{}'.format(args[1])
 
     def start_download(self, instance):
-        downloader = Downloader(self.percentageDownload_label)
+        downloader = Downloader(self.percentageDownload_label, self.viewerVideo)
         if self.play_link.text:
             download = Thread(target=downloader.playlist_download,
-                              args=(self.play_link.text, 'D:/download/', self.quality_max.text, self.quality_min.text))
-            print("DownloadingVideo")
+                              args=(self.play_link.text,
+                                    'D:/download/',
+                                    self.quality_max.text,
+                                    self.quality_min.text))
             download.start()
+            print("DownloadingVideo")
         else:
             print("No input to download")
+
+    def clear_viewer(self, instance):
+        clear_viewer = Thread(target=self.viewerVideo.clear_widgets)
+        clear_viewer.start()
+        #clear_viewer.join()
+
     # # ---- Functions ---- # #
 
     def creating_drop_down(self, instance, qualities=[]):
-
-        """playlist_url = self.play_link.text
-        if playlist_url is not self.playlist_url_dp:
-            self.playlist_url_dp = playlist_url
-            if playlist_url:
-                pl = Playlist(playlist_url)
-                video_list = pl.parse_links()
-                yt = YouTube("https://www.youtube.com/" + video_list[0])
-                res = {stream.resolution for stream in yt.streams.filter(adaptive=True, only_video=True).all()}
-                #ress = yt.streams.filter(adaptive=True, only_audio=True).all()
-                qualities = res
-                print(res)
-
-                self.q_drop_down.clear_widgets()
-                for quality in qualities:
-                    btn = Button(text=quality, size_hint_y=None, height=48)
-                    btn.bind(on_release=lambda btn: self.q_drop_down.select(btn.text))
-                    self.q_drop_down.add_widget(btn)
-                return True
-        else:
-            return False"""
+        pass
 
     def downloadPL_button(self):
         playlist_url = self.play_link.text
@@ -160,8 +166,8 @@ class HomePage(BoxLayout):
                     mx_idx = self.max_qualities.index(self.quality_max.text)
                     mn_idx = self.max_qualities.index(self.quality_min.text)
 
-                    file_extension_video = ""
-
+                    file_extension_video = "mp4"
+                    file_extension_audio = "mp4"
                     for i in range(mx_idx, mn_idx):
                         try:
                             yt.streams.filter(adaptive=True, res=self.max_qualities[i]).first().\
@@ -185,6 +191,10 @@ class HomePage(BoxLayout):
                                      f"{self.folder_path}/{video_name}.mkv")
                     os.remove(f"{self.folder_path}/{video_path}.{file_extension_video}")
                     os.remove(f"{self.folder_path}/{audio_path}.{file_extension_audio}")
+
+                    video_label = Label(text=y_title, color=(0.5, 0.5, 0.5, 1))
+                    self.viewerVideo.add_widget(video_label)
+
                     caption = yt.captions.get_by_language_code('en')
                     if caption:
                         my_file = open(self.folder_path + '/' + self.get_cnt(counter) + y_title + ".srt", "w+",
@@ -237,7 +247,6 @@ class HomePage(BoxLayout):
         return unicode(filename[:max_length].rsplit(' ', 0)[0])
 
 
-
 class YoutubeDownloader(App):
     def build(self):
         self.screen_manager = ScreenManager()
@@ -248,6 +257,12 @@ class YoutubeDownloader(App):
         self.screen_manager.add_widget(screen)
 
         return self.screen_manager
+
+    def stop(self, *args):
+        #App.get_running_app().stop()
+        #self.get_running_app().stop()
+        self.root_window.close()  # Fix app exit on Android.
+        return super(YoutubeDownloader, self).stop(*args)
 
 
 if __name__ == "__main__":
