@@ -62,7 +62,7 @@ class Downloader:
 
                     file_extension_video = ""
 
-                    """for i in range(mx_idx, mn_idx):
+                    for i in range(mx_idx, mn_idx):
                         try:
                             yt.streams.filter(adaptive=True, res=self.max_qualities[i]).first(). \
                                 download(self.folder_path, filename=video_path)
@@ -84,7 +84,7 @@ class Downloader:
                                      f"{self.folder_path}/{audio_path}.{file_extension_audio}",
                                      f"{self.folder_path}/{video_name}.mkv")
                     os.remove(f"{self.folder_path}/{video_path}.{file_extension_video}")
-                    os.remove(f"{self.folder_path}/{audio_path}.{file_extension_audio}")"""
+                    os.remove(f"{self.folder_path}/{audio_path}.{file_extension_audio}")
 
                     # ---- Changing Label Color if Video is downloaded --------
                     video_label.color = (0.13, 0.83, 0.25, 1)
