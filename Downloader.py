@@ -57,14 +57,14 @@ class Downloader:
                     print(test)
                     reshaped_text = arabic_reshaper.reshape(test)
                     display_text = bidi.algorithm.get_display(reshaped_text)
-                    video_label = Label(text=f"{counter}. {display_text}", color=(1, 0.5, 1, 1),
+                    video_label = Label(text=f"{counter}. {display_text}", color=(1, 0.9, 1, 1),
                         size_hint_y=None, height=60, halign="left", valign="middle",
                                         size_hint_x=0.8, font_name='Arial')
                     video_label.bind(size=video_label.setter('text_size'))
                     self.viewerVideo.height += video_label.height*2
                     self.viewerVideo.add_widget(video_label)
 
-                    self.video_label2 = Label(text="", color=(0.5, 0.5, 0.5, 1),
+                    self.video_label2 = Label(text="", color=(1, 0.9, 1, 1),
                                          size_hint_y=None,
                                     height=40, halign="left", valign="middle",
                                               size_hint_x=0.1)
@@ -72,7 +72,7 @@ class Downloader:
                     self.viewerVideo.add_widget(self.video_label2)
 
                     test2 = f"0 %"
-                    self.video_label3 = Label(text=test2, color=(0.5, 0.5, 0.5, 1),
+                    self.video_label3 = Label(text=test2, color=(1, 0.9, 1, 1),
                                          size_hint_y=None,
                                     height=40, halign="right", valign="middle",
                                               size_hint_x=0.1)

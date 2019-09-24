@@ -50,10 +50,10 @@ class HomePage(BoxLayout):
                                         size_hint_y=0.2))
         self.upperGrid.add_widget(Label(text="Youtube Downloader |",
                                         font_size=35,
-                                        size_hint_x=0.4, size_hint_y=.2))
+                                        size_hint_x=0.4, size_hint_y=.2, color=(1, 0.8, 1, 1)))
         self.percentageDownload_label = Label(text=f"{self.percentageDownload} %",
                                               font_size=20,
-                                              size_hint_x=0.2, size_hint_y=0.2)
+                                              size_hint_x=0.2, size_hint_y=0.2, color=(1, 0.8, 1, 1))
         self.upperGrid.add_widget(self.percentageDownload_label)
         self.add_widget(self.upperGrid)
 
@@ -64,7 +64,6 @@ class HomePage(BoxLayout):
         self.add_widget(self.midGrid)
         self.midGrid.cols, self.midGrid.orientation = 3, 'vertical'
         self.midGrid.size_hint_y = 0.21
-        self.midGrid.canvas.before
 
         self.q_drop_down_max = DropDown()
         self.q_drop_down_min = DropDown()
@@ -72,27 +71,27 @@ class HomePage(BoxLayout):
         self.max_qualities = ['2160p', '1440p', '1080p', '720p', '480p', '360p', '240p', '144p']
         self.min_qualities = self.max_qualities[::-1]
 
-        self.quality_max = Button(text='Quality', size_hint=(None, None), height='48dp')
+        self.quality_max = Button(text='Max Quality', size_hint=(None, None), height='48dp', color=(1, 0.9, 1, 1))
         self.quality_max.bind(on_release=self.q_drop_down_max.open)
         self.quality_max.bind(on_press=self.creating_drop_down)
         self.q_drop_down_max.bind(on_select=lambda instance, q: setattr(self.quality_max, 'text', q))
         for quality in self.max_qualities:
-            btn1 = Button(text=quality, size_hint_y=None, height=48)
+            btn1 = Button(text=quality, size_hint_y=None, height=48, color=(1, 0.9, 1, 1))
             btn1.bind(on_release=lambda btn1: self.q_drop_down_max.select(btn1.text))
             self.q_drop_down_max.add_widget(btn1)
         self.midGrid.add_widget(self.quality_max)
 
-        self.quality_min = Button(text='Quality', size_hint=(None, None), height='48dp')
+        self.quality_min = Button(text='Min Quality', size_hint=(None, None), height='48dp', color=(1, 0.9, 1, 1))
         self.quality_min.bind(on_release=self.q_drop_down_min.open)
         self.quality_min.bind(on_press=self.creating_drop_down)
         self.q_drop_down_min.bind(on_select=lambda instance, q: setattr(self.quality_min, 'text', q))
         for quality in self.min_qualities:
-            btn2 = Button(text=quality, size_hint_y=None, height=48)
+            btn2 = Button(text=quality, size_hint_y=None, height=48, color=(1, 0.9, 1, 1))
             btn2.bind(on_release=lambda btn2: self.q_drop_down_min.select(btn2.text))
             self.q_drop_down_min.add_widget(btn2)
         self.midGrid.add_widget(self.quality_min)
 
-        self.v_download = Button(text="Download")
+        self.v_download = Button(text="Download", color=(1, 0.9, 1, 1))
         self.v_download.bind(on_press=self.start_download)
         self.midGrid.add_widget(self.v_download)
 
@@ -105,9 +104,9 @@ class HomePage(BoxLayout):
         self.add_widget(self.scroll)
 
         self.lower_grid = GridLayout(cols=2, size_hint_y=0.1)
-        self.clear_btn = Button(text="Clear")
+        self.clear_btn = Button(text="Clear", color=(1, 0.9, 1, 1))
         self.clear_btn.bind(on_press=self.clear_viewer)
-        self.stop_btn = Button(text="Stop Download")
+        self.stop_btn = Button(text="Stop Download", color=(1, 0.9, 1, 1))
         self.stop_btn.bind(on_press=self.on_select)
         self.lower_grid.add_widget(self.clear_btn)
         self.lower_grid.add_widget(self.stop_btn)
