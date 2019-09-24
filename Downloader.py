@@ -86,13 +86,13 @@ class Downloader:
                     merge_done = False
                     for i in range(mx_idx, mn_idx+1):
                         try:
+                            self.video_label2.text = self.max_qualities[i]
                             yt.streams.filter(adaptive=True, res=self.max_qualities[i]).first(). \
                                 download(self.folder_path, filename=video_path)
                             sss = [stream.subtype for stream in
                                    yt.streams.filter(adaptive=True, res=self.max_qualities[i]).all()]
                             file_extension_video = sss[0]
                             video_done = True
-                            self.video_label2.text = self.max_qualities[i]
                             break
                         except Exception as e:
                             print(f"Quality does not exist'|  {e}  |Quality:{self.max_qualities[i]}")
