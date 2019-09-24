@@ -23,7 +23,7 @@ import sys
 
 Config.set('graphics', 'resizable', False)
 Window.clearcolor = (0.17, 0.17, 0.17, 1)
-Window.size = (600, 400)
+Window.size = (650, 400)
 
 
 class HomePage(BoxLayout):
@@ -69,7 +69,7 @@ class HomePage(BoxLayout):
         self.q_drop_down_max = DropDown()
         self.q_drop_down_min = DropDown()
 
-        self.max_qualities = ['2160p', '1440p', '1080p', '720p', '480p', '360', '240p', '144p']
+        self.max_qualities = ['2160p', '1440p', '1080p', '720p', '480p', '360p', '240p', '144p']
         self.min_qualities = self.max_qualities[::-1]
 
         self.quality_max = Button(text='Quality', size_hint=(None, None), height='48dp')
@@ -98,7 +98,7 @@ class HomePage(BoxLayout):
 
         self.scroll = ScrollView()
 
-        self.viewerVideo = GridLayout(cols=2, size_hint_y=None, spacing=10, height=600)
+        self.viewerVideo = GridLayout(cols=3, size_hint_y=None, spacing=10, height=600)
 
         self.scroll.add_widget(self.viewerVideo)
 
@@ -108,35 +108,44 @@ class HomePage(BoxLayout):
         self.clear_btn = Button(text="Clear")
         self.clear_btn.bind(on_press=self.clear_viewer)
         self.stop_btn = Button(text="Stop Download")
-       # self.stop_btn.bind(on_press=self.stop_by_thred)
+        self.stop_btn.bind(on_press=self.on_select)
         self.lower_grid.add_widget(self.clear_btn)
         self.lower_grid.add_widget(self.stop_btn)
 
         self.add_widget(self.lower_grid)
-
+        self.download = Thread()
     # ...............................................................................
     # # -- Event Functions -- # #
 
     def on_select(self, instance):
-        pass
+        t = Thread(target=self.o7a)
+        t.daemon = True
+        t.start()
+
+    def o7a(self):
+        sys.exit(0)
+        if self.download.isAlive():
+            self.download.st
+
 
     def start_download(self, instance):
         downloader = Downloader(self.percentageDownload_label, self.viewerVideo)
         if self.play_link.text:
-            download = Thread(target=downloader.playlist_download,
+            self.download = Thread(target=downloader.playlist_download,
                               args=(self.play_link.text,
                                     'D:/download/',
                                     self.quality_max.text,
                                     self.quality_min.text))
-            download.start()
+            self.download.daemon = True
+            self.download.start()
             print("DownloadingVideo")
         else:
             print("No input to download")
 
     def clear_viewer(self, instance):
         clear_viewer = Thread(target=self.viewerVideo.clear_widgets)
+        clear_viewer.daemon = True
         clear_viewer.start()
-        #clear_viewer.join()
 
     # # ---- Functions ---- # #
 

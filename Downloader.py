@@ -8,6 +8,7 @@ from pytube.compat import unicode
 from kivy.uix.label import Label
 import arabic_reshaper
 import bidi.algorithm
+from kivy.core.window import Window
 
 
 class Downloader:
@@ -15,7 +16,7 @@ class Downloader:
         self.playlistLen = 0
         self.folder_path = ""
         self.total_size = 1
-        self.max_qualities = ['2160p', '1440p', '1080p', '720p', '480p', '360', '240p', '144p']
+        self.max_qualities = ['2160p', '1440p', '1080p', '720p', '480p', '360p', '240p', '144p']
         self.min_qualities = self.max_qualities[::-1]
         self.percentageDownload = 0
         self.percentageDownload_label = percentage_download_label
@@ -26,6 +27,7 @@ class Downloader:
 
     def exit_my_prog(self):
         exit()
+
     def playlist_download(self, play_list_link, folder_path, quality_max, quality_min):
         self.folder_path = folder_path
         playlist_url = play_list_link
@@ -56,15 +58,26 @@ class Downloader:
                     reshaped_text = arabic_reshaper.reshape(test)
                     display_text = bidi.algorithm.get_display(reshaped_text)
                     video_label = Label(text=f"{counter}. {display_text}", color=(1, 0.5, 1, 1),
-                        size_hint_y=None, height=60, halign="left", valign="middle", font_name='Arial')
+                        size_hint_y=None, height=60, halign="left", valign="middle",
+                                        size_hint_x=0.8, font_name='Arial')
                     video_label.bind(size=video_label.setter('text_size'))
                     self.viewerVideo.height += video_label.height*2
                     self.viewerVideo.add_widget(video_label)
-                    test2 = f"0 %"
-                    self.video_label2 = Label(text=test2, color=(0.5, 0.5, 0.5, 1),
-                                         size_hint_y=None, height=40, halign="right", valign="middle")
+
+                    self.video_label2 = Label(text="", color=(0.5, 0.5, 0.5, 1),
+                                         size_hint_y=None,
+                                    height=40, halign="left", valign="middle",
+                                              size_hint_x=0.1)
                     self.video_label2.bind(size=self.video_label2.setter('text_size'))
                     self.viewerVideo.add_widget(self.video_label2)
+
+                    test2 = f"0 %"
+                    self.video_label3 = Label(text=test2, color=(0.5, 0.5, 0.5, 1),
+                                         size_hint_y=None,
+                                    height=40, halign="right", valign="middle",
+                                              size_hint_x=0.1)
+                    self.video_label3.bind(size=self.video_label3.setter('text_size'))
+                    self.viewerVideo.add_widget(self.video_label3)
                     # ---------------------------------------------------
 
                     file_extension_video = ""
@@ -78,8 +91,8 @@ class Downloader:
                             sss = [stream.subtype for stream in
                                    yt.streams.filter(adaptive=True, res=self.max_qualities[i]).all()]
                             file_extension_video = sss[0]
-                            print("hi")
                             video_done = True
+                            self.video_label2.text = self.max_qualities[i]
                             break
                         except Exception as e:
                             print(f"Quality does not exist'|  {e}  |Quality:{self.max_qualities[i]}")
@@ -137,7 +150,7 @@ class Downloader:
         self.total_size = max(bytes_remaining, self.total_size)
         self.percentageDownload = int(100 - (bytes_remaining / self.total_size * 100))
         self.percentageDownload_label.text = f"{self.percentageDownload} %"
-        self.video_label2.text = f"{self.percentageDownload} %"
+        self.video_label3.text = f"{self.percentageDownload} %"
         print(f"{self.percentageDownload} %")
         return
 
