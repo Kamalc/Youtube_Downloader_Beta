@@ -9,6 +9,7 @@ from kivy.uix.label import Label
 import arabic_reshaper
 import bidi.algorithm
 
+
 class Downloader:
     def __init__(self, percentage_download_label, viewer_video):
         self.playlistLen = 0
@@ -23,6 +24,8 @@ class Downloader:
                                          size_hint_y=None, height=40,
                                  halign="right", valign="middle")
 
+    def exit_my_prog(self):
+        exit()
     def playlist_download(self, play_list_link, folder_path, quality_max, quality_min):
         self.folder_path = folder_path
         playlist_url = play_list_link
@@ -65,33 +68,49 @@ class Downloader:
                     # ---------------------------------------------------
 
                     file_extension_video = ""
-
-                    for i in range(mx_idx, mn_idx):
+                    video_done = False
+                    audio_done = False
+                    merge_done = False
+                    for i in range(mx_idx, mn_idx+1):
                         try:
                             yt.streams.filter(adaptive=True, res=self.max_qualities[i]).first(). \
                                 download(self.folder_path, filename=video_path)
                             sss = [stream.subtype for stream in
                                    yt.streams.filter(adaptive=True, res=self.max_qualities[i]).all()]
                             file_extension_video = sss[0]
+                            print("hi")
+                            video_done = True
                             break
                         except Exception as e:
-                            # i += 1
                             print(f"Quality does not exist'|  {e}  |Quality:{self.max_qualities[i]}")
 
-                    yt.streams.filter(adaptive=True, only_audio=True).first().download(self.folder_path,
-                                                                                       filename=audio_path)
-                    sss2 = [stream.subtype for stream in yt.streams.filter(adaptive=True, only_audio=True).all()]
-                    print(sss2)
-                    file_extension_audio = sss2[0]
+                    if video_done:
+                        try:
+                            yt.streams.filter(adaptive=True, only_audio=True).first().download(self.folder_path,
+                                                                                               filename=audio_path)
+                            sss2 = [stream.subtype for stream in yt.streams.filter(adaptive=True, only_audio=True).all()]
+                            print(sss2)
+                            file_extension_audio = sss2[0]
+                            audio_done = True
+                        except Exception as e:
+                            print(f"audio does not exist' {e}")
 
-                    MergeVA.merge_va(isinstance, f"{self.folder_path}/{video_path}.{file_extension_video}",
-                                     f"{self.folder_path}/{audio_path}.{file_extension_audio}",
-                                     f"{self.folder_path}/{video_name}.mkv")
-                    os.remove(f"{self.folder_path}/{video_path}.{file_extension_video}")
-                    os.remove(f"{self.folder_path}/{audio_path}.{file_extension_audio}")
+                    if audio_done and video_done:
+                        MergeVA.merge_va(isinstance, f"{self.folder_path}/{video_path}.{file_extension_video}",
+                                         f"{self.folder_path}/{audio_path}.{file_extension_audio}",
+                                         f"{self.folder_path}/{video_name}.mkv")
+                        merge_done = True
+                    try:
+                        os.remove(f"{self.folder_path}/{video_path}.{file_extension_video}")
+                        os.remove(f"{self.folder_path}/{audio_path}.{file_extension_audio}")
+                    except Exception as e:
+                        print(f"can't Remove |  {e} ")
 
                     # ---- Changing Label Color if Video is downloaded --------
-                    video_label.color = (0.13, 0.83, 0.25, 1)
+                    if merge_done:
+                        video_label.color = (0.13, 0.83, 0.25, 1)
+                    else:
+                        video_label.color = (1, 0, 0, 1)
                     # ---------------------------------------------------------
 
                     caption = yt.captions.get_by_language_code('en')

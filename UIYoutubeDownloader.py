@@ -19,6 +19,7 @@ from kivy.graphics import Color, Rectangle
 from kivy.uix.screenmanager import Screen, ScreenManager
 from kivy.core.window import Window
 from Downloader import Downloader
+import sys
 
 Config.set('graphics', 'resizable', False)
 Window.clearcolor = (0.17, 0.17, 0.17, 1)
@@ -107,7 +108,7 @@ class HomePage(BoxLayout):
         self.clear_btn = Button(text="Clear")
         self.clear_btn.bind(on_press=self.clear_viewer)
         self.stop_btn = Button(text="Stop Download")
-        #self.stop_btn.bind(on_press=self.download.join())
+       # self.stop_btn.bind(on_press=self.stop_by_thred)
         self.lower_grid.add_widget(self.clear_btn)
         self.lower_grid.add_widget(self.stop_btn)
 
