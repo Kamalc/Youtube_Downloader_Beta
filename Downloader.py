@@ -6,13 +6,13 @@ from pytube import Playlist
 from pytube import YouTube
 from pytube.compat import unicode
 from kivy.uix.label import Label
-import arabic_reshaper
-import bidi.algorithm
+#import arabic_reshaper
+#import bidi.algorithm
 from kivy.core.window import Window
 
 
 class Downloader:
-    def __init__(self, percentage_download_label, viewer_video):
+    def __init__(self, percentage_download_label, viewer_video, def_directory):
         self.playlistLen = 0
         self.folder_path = ""
         self.total_size = 1
@@ -24,6 +24,7 @@ class Downloader:
         self.video_label2 = Label(text="0 %", color=(0.5, 0.5, 0.5, 1),
                                          size_hint_y=None, height=40,
                                  halign="right", valign="middle")
+        self.def_directory = def_directory
 
     def exit_my_prog(self):
         exit()
@@ -55,14 +56,21 @@ class Downloader:
                     # ---- Adding Label of Video Title --------
                     test = f" {y_title}   "
                     print(test)
-                    reshaped_text = arabic_reshaper.reshape(test)
-                    display_text = bidi.algorithm.get_display(reshaped_text)
-                    video_label = Label(text=f"{counter}. {display_text}", color=(1, 0.9, 1, 1),
+                    #reshaped_text = arabic_reshaper.reshape(test)
+                    #display_text = bidi.algorithm.get_display(reshaped_text)
+                    video_label = Label(text=f"{counter}. {test}", color=(1, 0.9, 1, 1),
                         size_hint_y=None, height=60, halign="left", valign="middle",
-                                        size_hint_x=0.8, font_name='Arial')
+                                        size_hint_x=0.6, font_name='Arial')
                     video_label.bind(size=video_label.setter('text_size'))
                     self.viewerVideo.height += video_label.height*2
                     self.viewerVideo.add_widget(video_label)
+
+                    self.video_folder = Label(text=self.def_directory+folder_name, color=(1, 0.9, 1, 1),
+                                              size_hint_y=None,
+                                              height=40, halign="left", valign="middle",
+                                              size_hint_x=0.2)
+                    self.video_folder.bind(size=self.video_folder.setter('text_size'))
+                    self.viewerVideo.add_widget(self.video_folder)
 
                     self.video_label2 = Label(text="", color=(1, 0.9, 1, 1),
                                          size_hint_y=None,
@@ -78,12 +86,15 @@ class Downloader:
                                               size_hint_x=0.1)
                     self.video_label3.bind(size=self.video_label3.setter('text_size'))
                     self.viewerVideo.add_widget(self.video_label3)
+
                     # ---------------------------------------------------
 
                     file_extension_video = ""
                     video_done = False
                     audio_done = False
                     merge_done = False
+                    if mx_idx > mn_idx:
+                        mx_idx = mn_idx
                     for i in range(mx_idx, mn_idx+1):
                         try:
                             self.video_label2.text = self.max_qualities[i]
@@ -109,15 +120,12 @@ class Downloader:
                             print(f"audio does not exist' {e}")
 
                     if audio_done and video_done:
-                        MergeVA.merge_va(isinstance, f"{self.folder_path}/{video_path}.{file_extension_video}",
+                        if MergeVA.merge_va(isinstance, f"{self.folder_path}/{video_path}.{file_extension_video}",
                                          f"{self.folder_path}/{audio_path}.{file_extension_audio}",
-                                         f"{self.folder_path}/{video_name}.mkv")
-                        merge_done = True
-                    try:
-                        os.remove(f"{self.folder_path}/{video_path}.{file_extension_video}")
-                        os.remove(f"{self.folder_path}/{audio_path}.{file_extension_audio}")
-                    except Exception as e:
-                        print(f"can't Remove |  {e} ")
+                                         f"{self.folder_path}/{video_name}.mkv"):
+                            merge_done = True
+                        else:
+                            merge_done = False
 
                     # ---- Changing Label Color if Video is downloaded --------
                     if merge_done:
@@ -134,11 +142,18 @@ class Downloader:
                         my_file.close()
                     else:
                         print("No Sub Found")
+
                 except Exception as e:
                     print("Can't Download: " + str(e))
                     # ---- Changing Label Color if Video is not downloaded ----
                     video_label.color = (1, 0, 0, 1)
-                    # ---------------------------------------------------------
+                finally:
+                    try:
+                        os.remove(f"{self.folder_path}/{video_path}.{file_extension_video}")
+                        os.remove(f"{self.folder_path}/{audio_path}.{file_extension_audio}")
+                    except Exception as e:
+                        print(f"can't Remove |  {e} ")
+                # ---------------------------------------------------------
                 counter += 1
 
     def download_video(self):

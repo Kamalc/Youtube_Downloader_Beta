@@ -16,11 +16,12 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.dropdown import DropDown
 from kivy.uix.scrollview import ScrollView
 from kivy.uix.popup import Popup
-from kivy.uix.filechooser import FileChooser, FileChooserListView
+from kivy.uix.filechooser import FileChooser, FileChooserListView, FileChooserIconView
 from kivy.graphics import Color, Rectangle
 from kivy.uix.screenmanager import Screen, ScreenManager
 from kivy.core.window import Window
 from Downloader import Downloader
+from functools import partial
 import sys
 
 Config.set('graphics', 'resizable', False)
@@ -100,7 +101,7 @@ class HomePage(BoxLayout):
 
         self.scroll = ScrollView()
 
-        self.viewerVideo = GridLayout(cols=3, size_hint_y=None, spacing=10, height=600)
+        self.viewerVideo = GridLayout(cols=4, size_hint_y=None, spacing=10, height=600)
 
         self.scroll.add_widget(self.viewerVideo)
 
@@ -138,7 +139,7 @@ class HomePage(BoxLayout):
         self.directory_window.open()
 
     def start_download(self, instance):
-        downloader = Downloader(self.percentageDownload_label, self.viewerVideo)
+        downloader = Downloader(self.percentageDownload_label, self.viewerVideo, self.def_directory)
         if self.play_link.text:
             self.download = Thread(target=downloader.playlist_download,
                               args=(self.play_link.text,
@@ -152,9 +153,15 @@ class HomePage(BoxLayout):
             print("No input to download")
 
     def clear_viewer(self, instance):
-        clear_viewer = Thread(target=self.viewerVideo.clear_widgets)
+        #clear_viewer = Thread(target=self.viewerVideo.clear_widgets)
+        clear_viewer = Thread(target=self.clearing)
         clear_viewer.daemon = True
         clear_viewer.start()
+
+    def clearing(self):
+        print(self.viewerVideo.children[:4])
+        self.viewerVideo.clear_widgets(self.viewerVideo.children[0:4])
+        #self.viewerVideo.remove_widget(self.viewerVideo.children[:4])
 
     def choose_folder(self, instance):
         print(self.show_popup.path)
@@ -173,10 +180,30 @@ class HomePage(BoxLayout):
 class PopU(BoxLayout):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.file_chooser_list = FileChooserListView()
+
+        self.partitions_caption = os.popen('wmic logicaldisk get caption').read()
+        self.partitions_caption = self.partitions_caption.split()
+        self.partitions_caption.remove('Caption')
+        print(self.partitions_caption)
+        self.partitions_btn = GridLayout(cols=10, rows=1, size_hint_y=0.1, spacing=2)
+        for partition in self.partitions_caption:
+            self.part_btn = Button(text=partition, id=partition+"\\")
+            #self.part_btn.bind(on_release=lambda *args: self.change_main_direct(self.part_btn.id, *args))
+            self.part_btn.bind(on_release=partial(self.change_main_direct, self.part_btn.id))
+            #print(self.part_btn.id)
+            self.partitions_btn.add_widget(self.part_btn)
+
+        self.add_widget(self.partitions_btn)
+
+        self.file_chooser_list = FileChooserIconView(size_hint_y=0.8)
         self.file_chooser_list.dirselect = True
         self.file_chooser_list.bind(selection=self.on_select)
         self.file_chooser_list.path = "D:\\"
+
+        """self.file_chooser_list = FileChooserListView(size_hint_y=0.8)
+        self.file_chooser_list.dirselect = True
+        self.file_chooser_list.bind(selection=self.on_select)
+        self.file_chooser_list.path = "D:\\"""
 
         self.buttons_grid = GridLayout(cols=2, rows=1, size_hint_y=0.1, spacing=2)
         self.load_btn = Button(text="Select", size_hint=(0.4, 0.1))
@@ -194,6 +221,11 @@ class PopU(BoxLayout):
         if self.file_chooser_list.selection:
             self.path = self.file_chooser_list.selection[0]
             print(self.path)
+
+
+    def change_main_direct(self, path, *instance):
+        print(path)
+        self.file_chooser_list.path = path
 
 
 class YoutubeDownloader(App):
