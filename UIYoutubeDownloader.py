@@ -22,7 +22,6 @@ from kivy.uix.screenmanager import Screen, ScreenManager
 from kivy.core.window import Window
 from Downloader import Downloader
 from functools import partial
-import sys
 
 Config.set('graphics', 'resizable', False)
 Window.clearcolor = (0.17, 0.17, 0.17, 1)
@@ -95,7 +94,7 @@ class HomePage(BoxLayout):
         self.v_download.bind(on_press=self.start_download)
         self.midGrid.add_widget(self.v_download)
 
-        self.directory_btn = Button(text="Dir", size_hint_x=0.1, color=(1, 0.9, 1, 1))
+        self.directory_btn = Button(text="Browse", size_hint_x=0.1, color=(1, 0.9, 1, 1))
         self.directory_btn.bind(on_release=self.choose_directory)
         self.midGrid.add_widget(self.directory_btn)
 
@@ -144,8 +143,8 @@ class HomePage(BoxLayout):
             self.download = Thread(target=downloader.playlist_download,
                               args=(self.play_link.text,
                                     self.def_directory,
-                                    self.quality_max.text,
-                                    self.quality_min.text))
+                                    self.quality_max,
+                                    self.quality_min))
             self.download.daemon = True
             self.download.start()
             print("DownloadingVideo")
@@ -218,14 +217,20 @@ class PopU(BoxLayout):
         self.path = ""
 
     def on_select(self, instance, obj):
-        if self.file_chooser_list.selection:
-            self.path = self.file_chooser_list.selection[0]
-            print(self.path)
+        try:
+            if self.file_chooser_list.selection:
+                self.path = self.file_chooser_list.selection[0]
+                print(self.path)
+        except Exception as e:
+            print(f"Selecting Directory, Error: {e} ")
 
 
     def change_main_direct(self, path, *instance):
         print(path)
-        self.file_chooser_list.path = path
+        try:
+            self.file_chooser_list.path = path
+        except Exception as e:
+            print(f"Changing Path: error:{e}")
 
 
 class YoutubeDownloader(App):

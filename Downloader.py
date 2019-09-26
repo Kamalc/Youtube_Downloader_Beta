@@ -8,7 +8,6 @@ from pytube.compat import unicode
 from kivy.uix.label import Label
 #import arabic_reshaper
 #import bidi.algorithm
-from kivy.core.window import Window
 
 
 class Downloader:
@@ -50,20 +49,25 @@ class Downloader:
                     video_path = video_name + "_v"
                     audio_path = video_name + "_a"
 
-                    mx_idx = self.max_qualities.index(quality_max)
-                    mn_idx = self.max_qualities.index(quality_min)
+                    if quality_max.text == 'Max Quality':
+                        quality_max.text = '2160p'
+                    if quality_min.text == 'Min Quality':
+                        quality_min.text = '144p'
+
+                    mx_idx = self.max_qualities.index(quality_max.text)
+                    mn_idx = self.max_qualities.index(quality_min.text)
 
                     # ---- Adding Label of Video Title --------
-                    test = f" {y_title}   "
+                    test = f' {y_title}   '
                     print(test)
                     #reshaped_text = arabic_reshaper.reshape(test)
                     #display_text = bidi.algorithm.get_display(reshaped_text)
-                    video_label = Label(text=f"{counter}. {test}", color=(1, 0.9, 1, 1),
+                    self.video_label = Label(text=f"{counter}. {test}", color=(1, 0.9, 1, 1),
                         size_hint_y=None, height=60, halign="left", valign="middle",
                                         size_hint_x=0.6, font_name='Arial')
-                    video_label.bind(size=video_label.setter('text_size'))
-                    self.viewerVideo.height += video_label.height*2
-                    self.viewerVideo.add_widget(video_label)
+                    self.video_label.bind(size=self.video_label.setter('text_size'))
+                    self.viewerVideo.height += self.video_label.height*2
+                    self.viewerVideo.add_widget(self.video_label)
 
                     self.video_folder = Label(text=self.def_directory+folder_name, color=(1, 0.9, 1, 1),
                                               size_hint_y=None,
@@ -93,6 +97,8 @@ class Downloader:
                     video_done = False
                     audio_done = False
                     merge_done = False
+
+                    print(mx_idx, mn_idx)
                     if mx_idx > mn_idx:
                         mx_idx = mn_idx
                     for i in range(mx_idx, mn_idx+1):
@@ -129,9 +135,9 @@ class Downloader:
 
                     # ---- Changing Label Color if Video is downloaded --------
                     if merge_done:
-                        video_label.color = (0.13, 0.83, 0.25, 1)
+                        self.video_label.color = (0.13, 0.83, 0.25, 1)
                     else:
-                        video_label.color = (1, 0, 0, 1)
+                        self.video_label.color = (1, 0, 0, 1)
                     # ---------------------------------------------------------
 
                     caption = yt.captions.get_by_language_code('en')
@@ -146,7 +152,7 @@ class Downloader:
                 except Exception as e:
                     print("Can't Download: " + str(e))
                     # ---- Changing Label Color if Video is not downloaded ----
-                    video_label.color = (1, 0, 0, 1)
+                    #self.video_label.color = (1, 0, 0, 1)
                 finally:
                     try:
                         os.remove(f"{self.folder_path}/{video_path}.{file_extension_video}")
