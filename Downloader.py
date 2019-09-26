@@ -24,9 +24,12 @@ class Downloader:
                                          size_hint_y=None, height=40,
                                  halign="right", valign="middle")
         self.def_directory = def_directory
-
+        self.kill_download = False
     def exit_my_prog(self):
         exit()
+
+    def set_kill_download(self, kill):
+        self.kill_download = kill
 
     def playlist_download(self, play_list_link, folder_path, quality_max, quality_min):
         self.folder_path = folder_path
@@ -40,6 +43,9 @@ class Downloader:
             self.create_new_folder(self.folder_path)
             counter = 1
             for x in video_list:
+                print(self.kill_download)
+                if self.kill_download:
+                    return
                 self.total_size = 1
                 try:
                     yt = YouTube("https://www.youtube.com/" + x)
@@ -98,6 +104,8 @@ class Downloader:
                     audio_done = False
                     merge_done = False
 
+                    if self.kill_download:
+                        return
                     print(mx_idx, mn_idx)
                     if mx_idx > mn_idx:
                         mx_idx = mn_idx

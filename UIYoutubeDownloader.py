@@ -6,6 +6,7 @@ from pytube import Playlist
 from pytube import YouTube
 from pytube.compat import unicode
 from threading import Thread
+import threading
 from kivy.config import Config
 from kivy.app import App
 from kivy.uix.label import Label
@@ -16,12 +17,14 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.dropdown import DropDown
 from kivy.uix.scrollview import ScrollView
 from kivy.uix.popup import Popup
+from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.filechooser import FileChooser, FileChooserListView, FileChooserIconView
 from kivy.graphics import Color, Rectangle
 from kivy.uix.screenmanager import Screen, ScreenManager
 from kivy.core.window import Window
 from Downloader import Downloader
 from functools import partial
+import sys
 
 Config.set('graphics', 'resizable', False)
 Window.clearcolor = (0.17, 0.17, 0.17, 1)
@@ -110,6 +113,7 @@ class HomePage(BoxLayout):
         self.clear_btn = Button(text="Clear", color=(1, 0.9, 1, 1))
         self.clear_btn.bind(on_press=self.clear_viewer)
         self.stop_btn = Button(text="Stop Download", color=(1, 0.9, 1, 1))
+        self.stop_btn.bind(on_release=self.stop_fn_btn)
         self.lower_grid.add_widget(self.clear_btn)
         self.lower_grid.add_widget(self.stop_btn)
 
@@ -118,29 +122,32 @@ class HomePage(BoxLayout):
         self.directory_window = Popup(title="Directory", content=self.show_popup, size_hint=(None, None),
                                       size=(500, 400))
         self.show_popup.cancel_btn.bind(on_release=self.directory_window.dismiss)
-        self.show_popup.load_btn.bind(on_release=self.choose_folder)
+        self.show_popup.select_btn.bind(on_release=self.choose_folder)
+        self.show_popup.path_Text.text = self.def_directory
+        self.show_popup.file_chooser_list.path = self.def_directory
+        self.kill_download = False
         # -------------------------------------------------------------
         self.download = Thread()
     # ...............................................................................
     # # -- Event Functions -- # #
 
-    """def on_select(self, instance):
+    def on_select(self, instance):
         t = Thread(target=self.stop_btn)
         t.daemon = True
         t.start()
 
-    def stop_btn(self):
-        sys.exit(0)
-        if self.download.isAlive():
-            self.download.st"""
+    def stop_fn_btn(self, instance):
+        self.downloader.kill_download = True
+
 
     def choose_directory(self, instance):
         self.directory_window.open()
 
     def start_download(self, instance):
-        downloader = Downloader(self.percentageDownload_label, self.viewerVideo, self.def_directory)
+        self.downloader = Downloader(self.percentageDownload_label, self.viewerVideo, self.def_directory)
+        #downloader.set_kill_download(self.kill_download)
         if self.play_link.text:
-            self.download = Thread(target=downloader.playlist_download,
+            self.download = Thread(target=self.downloader.playlist_download,
                               args=(self.play_link.text,
                                     self.def_directory,
                                     self.quality_max,
@@ -163,15 +170,15 @@ class HomePage(BoxLayout):
         #self.viewerVideo.remove_widget(self.viewerVideo.children[:4])
 
     def choose_folder(self, instance):
-        print(self.show_popup.path)
-        if self.show_popup.path:
-            self.path_folder(self.show_popup.path)
+        print(self.show_popup.path_Text.text)
+        if self.show_popup.path_Text.text:
+            self.path_folder(self.show_popup.path_Text.text)
         self.directory_window.dismiss()
 
     # # ---- Functions ---- # #
 
     def path_folder(self, path='D:/download'):
-        self.def_directory = path+"/"
+        self.def_directory = path#+"/"
         print(self.def_directory)
         return self.def_directory
 
@@ -194,25 +201,34 @@ class PopU(BoxLayout):
 
         self.add_widget(self.partitions_btn)
 
+        self.text_btn_grid = GridLayout(cols=1, rows=1, size_hint=(1, 0.09), spacing=5, padding=1)
+        self.path_Text = TextInput(multiline=False, size_hint_x=1, font_size=11)
+        #self.change_design_btn = Button(text="Lists", size_hint_x=0.2)
+        #self.change_design_btn.bind(on_release=self.change_design_fn)
+        self.text_btn_grid.add_widget(self.path_Text)
+        #self.text_btn_grid.add_widget(self.change_design_btn)
+        self.add_widget(self.text_btn_grid)
+
         self.file_chooser_list = FileChooserIconView(size_hint_y=0.8)
         self.file_chooser_list.dirselect = True
         self.file_chooser_list.bind(selection=self.on_select)
         self.file_chooser_list.path = "D:\\"
+        self.add_widget(self.file_chooser_list)
 
-        """self.file_chooser_list = FileChooserListView(size_hint_y=0.8)
-        self.file_chooser_list.dirselect = True
-        self.file_chooser_list.bind(selection=self.on_select)
-        self.file_chooser_list.path = "D:\\"""
+        """self.file_chooser_Icon = FileChooserIconView(size_hint_y=0.8)
+        self.file_chooser_Icon.dirselect = True
+        self.file_chooser_Icon.bind(selection=self.on_select)
+        self.file_chooser_Icon.path = "D:\\"
+        self.add_widget(self.file_chooser_Icon)"""
 
-        self.buttons_grid = GridLayout(cols=2, rows=1, size_hint_y=0.1, spacing=2)
-        self.load_btn = Button(text="Select", size_hint=(0.4, 0.1))
+        self.buttons_grid = GridLayout(cols=2, rows=2, size_hint_y=0.1, spacing=2)
+        self.select_btn = Button(text="Select", size_hint=(0.4, 0.1))
         self.cancel_btn = Button(text="Cancel", size_hint=(0.4, 0.1))
 
-        self.buttons_grid.add_widget(self.load_btn)
+        self.buttons_grid.add_widget(self.select_btn)
         self.buttons_grid.add_widget(self.cancel_btn)
 
         self.orientation = 'vertical'
-        self.add_widget(self.file_chooser_list)
         self.add_widget(self.buttons_grid)
         self.path = ""
 
@@ -220,6 +236,7 @@ class PopU(BoxLayout):
         try:
             if self.file_chooser_list.selection:
                 self.path = self.file_chooser_list.selection[0]
+                self.path_Text.text = self.path+"\\"
                 print(self.path)
         except Exception as e:
             print(f"Selecting Directory, Error: {e} ")
@@ -229,6 +246,7 @@ class PopU(BoxLayout):
         print(path)
         try:
             self.file_chooser_list.path = path
+            self.path_Text.text = path
         except Exception as e:
             print(f"Changing Path: error:{e}")
 
