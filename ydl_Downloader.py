@@ -5,10 +5,11 @@ import math
 from MergeVA import MergeVA
 import re
 from pytube.compat import unicode
+from kivy.uix.label import Label
 
 
 class Down:
-    def __init__(self):
+    def __init__(self, percentageDownload_label, viewerVideo, def_directory):
         self.folder_path = ''
         self.playlistLen = 0
         self.quality_ids = {2160: [313],
@@ -19,7 +20,12 @@ class Down:
                             360: [243, 134],
                             240: [133, 242],
                             144: [160, 278]}
-        pass
+        self.percentageDownload_label = percentageDownload_label
+        self.viewerVideo = viewerVideo
+        self.def_directory = def_directory
+        self.video_label2 = Label(text="", color=(0.5, 0.5, 0.5, 1),
+                                         size_hint_y=None, height=40,
+                                 halign="right", valign="middle")
 
     def video_download(self, video_opts="", audio_opts="", video="", counter=0):
         with youtube_dl.YoutubeDL(video_opts) as ydl:
@@ -34,26 +40,31 @@ class Down:
         audio_opts['outtmpl'] = f"{self.folder_path}/{video_name}_a.mp3"
         print(video)
         try:
+            self.making_viewer_ui(counter, video_title, self.folder_path)
             with youtube_dl.YoutubeDL(video_opts) as ydl:
+                self.video_label2.text = f"{video_meta['height']}P"
                 ydl.extract_info(video, download=True)
             with youtube_dl.YoutubeDL(audio_opts) as ydl:
                 ydl.extract_info(video, download=True)
+            if os.path.exists(f"{self.folder_path}/{video_name}.mkv"):
+                os.remove(f"{self.folder_path}/{video_name}.mkv")
             MergeVA().merge_va(video_opts['outtmpl'],
                                audio_opts['outtmpl'],
                                f"{self.folder_path}/{video_name}.mkv")
+            self.video_label.color = (0.13, 0.83, 0.25, 1)
         except Exception as e:
-            print(e)
+            print(f"Can't download Video/Audio: {e}")
+            self.video_label.color = (1, 0, 0, 1)
         finally:
             os.remove(video_opts['outtmpl'])
             os.remove(audio_opts['outtmpl'])
-
 
     def download(self, youtube_link, folder_path, quality_max, quality_min):
         self.folder_path = folder_path
         if youtube_link:
             opts = {}
             video_opts = {'format': '', 'outtmpl': ''}
-            audio_opts = {'format': '140/249/250/251', 'outtmpl': ''}
+            audio_opts = {'format': '250/249/251', 'outtmpl': ''}
 
             quality_max = int(quality_max[0:-1])
             quality_min = int(quality_min[0:-1])
@@ -89,6 +100,39 @@ class Down:
                         print(e)
                     counter += 1
 
+    def making_viewer_ui(self, counter, y_title, folder_path):
+        title = f' {y_title}   '
+        self.video_label = Label(text=f"{counter}. {title}", color=(1, 0.9, 1, 1),
+                                 size_hint_y=None, height=60, halign="left", valign="middle",
+                                 size_hint_x=0.7, font_name='Arial')
+        self.video_label.bind(size=self.video_label.setter('text_size'))
+        self.viewerVideo.height += self.video_label.height * 2
+        self.viewerVideo.add_widget(self.video_label)
+
+        self.video_folder = Label(text=folder_path, color=(1, 0.9, 1, 1),
+                                  size_hint_y=None,
+                                  height=40, halign="left", valign="middle",
+                                  size_hint_x=0.2)
+        self.video_folder.bind(size=self.video_folder.setter('text_size'))
+        self.viewerVideo.add_widget(self.video_folder)
+
+        self.video_label2 = Label(text="", color=(1, 0.9, 1, 1),
+                                  size_hint_y=None,
+                                  height=40, halign="right", valign="middle",
+                                  size_hint_x=0.05)
+        self.video_label2.bind(size=self.video_label2.setter('text_size'))
+        self.viewerVideo.add_widget(self.video_label2)
+
+        test2 = f"0 %"
+        self.video_label3 = Label(text=test2, color=(1, 0.9, 1, 1),
+                                  size_hint_y=None,
+                                  height=40, halign="right", valign="middle",
+                                  size_hint_x=0.05)
+        self.video_label3.bind(size=self.video_label3.setter('text_size'))
+        self.viewerVideo.add_widget(self.video_label3)
+
+        # ---------------------------------------------------
+
     @staticmethod
     def filename(s="", max_length=255):
         # Characters in range 0-31 (0x00-0x1F) are not allowed in ntfs filenames.
@@ -116,10 +160,3 @@ class Down:
         for i in range(math.ceil(math.log10(self.playlistLen)) - len(str(cnt))):
             cnt_str += '0'
         return cnt_str + str(cnt) + '.'
-
-
-x = Down()
-x.download(youtube_link='https://www.youtube.com/playlist?list=PLxL5AlqSq21IzKg3aL0TzftTPKSm0DNPD',
-                        folder_path=r"D:/download/",
-                        quality_max='720p',
-                        quality_min='144p')
