@@ -12,6 +12,7 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.dropdown import DropDown
 from kivy.uix.scrollview import ScrollView
 from kivy.uix.popup import Popup
+from kivy.uix.image import AsyncImage
 from kivy.uix.filechooser import FileChooser, FileChooserListView, FileChooserIconView
 from kivy.uix.checkbox import CheckBox
 from kivy.uix.screenmanager import Screen, ScreenManager
@@ -96,10 +97,13 @@ class HomePage(BoxLayout):
         self.directory_btn = Button(text="Browse", size_hint_x=0.1, color=(1, 0.9, 1, 1))
         self.directory_btn.bind(on_release=self.choose_directory)
         self.midGrid.add_widget(self.directory_btn)
+        #icon = AsyncImage(source='https://i.ytimg.com/vi/ACRAptyOwls/maxresdefault.jpg',
+        #                  allow_stretch=True, size_hint_x=0.1)
+        #self.midGrid.add_widget(icon)
 
         self.scroll = ScrollView()
 
-        self.viewerVideo = GridLayout(cols=4, size_hint_y=None, spacing=10, height=600)
+        self.viewerVideo = GridLayout(cols=5, size_hint_y=None, spacing=10, height=600, padding=2)
 
         self.scroll.add_widget(self.viewerVideo)
 
@@ -125,6 +129,7 @@ class HomePage(BoxLayout):
         # -------------------------------------------------------------
         self.downloader = Down(self.percentageDownload_label, self.viewerVideo, self.def_directory)
         self.download = Process()
+        self.download2 = Process()
         self.paused = False
     # ...............................................................................
     # # -- Event Functions -- # #
@@ -138,11 +143,11 @@ class HomePage(BoxLayout):
         if not self.paused:
             self.stop_btn.text = "Resume Download"
             self.paused = True
-            #self.download.terminate()
+            #self.download2.terminate()
         else:
             self.stop_btn.text = "Pause Download"
             self.paused = False
-            #self.download.start()
+            #self.download2.start()
 
     def choose_directory(self, instance):
         self.directory_window.open()
@@ -160,6 +165,7 @@ class HomePage(BoxLayout):
                                           self.quality_min.text))
             print("Downloading")
             self.download.daemon = True
+            #self.download2 = Process(target=self.download)
             self.download.start()
         else:
             print("No input to download")

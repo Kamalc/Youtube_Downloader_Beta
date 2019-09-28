@@ -6,6 +6,7 @@ from MergeVA import MergeVA
 import re
 from pytube.compat import unicode
 from kivy.uix.label import Label
+from kivy.uix.image import Image, AsyncImage
 
 
 class Down:
@@ -40,7 +41,7 @@ class Down:
         audio_opts['outtmpl'] = f"{self.folder_path}/{video_name}_a.mp3"
         print(video)
         try:
-            self.making_viewer_ui(counter, video_title, self.folder_path)
+            self.making_viewer_ui(counter, video_title, self.folder_path, f"{video_meta['thumbnail']}")
             with youtube_dl.YoutubeDL(video_opts) as ydl:
                 self.video_label2.text = f"{video_meta['height']}P"
                 ydl.extract_info(video, download=True)
@@ -56,8 +57,10 @@ class Down:
             print(f"Can't download Video/Audio: {e}")
             self.video_label.color = (1, 0, 0, 1)
         finally:
-            os.remove(video_opts['outtmpl'])
-            os.remove(audio_opts['outtmpl'])
+            if os.path.exists(video_opts['outtmpl']):
+                os.remove(video_opts['outtmpl'])
+            if os.path.exists(audio_opts['outtmpl']):
+                os.remove(audio_opts['outtmpl'])
 
     def download(self, youtube_link, folder_path, quality_max, quality_min):
         self.folder_path = folder_path
@@ -100,34 +103,37 @@ class Down:
                         print(e)
                     counter += 1
 
-    def making_viewer_ui(self, counter, y_title, folder_path):
+    def making_viewer_ui(self, counter, y_title, folder_path, img_url):
+        icon = AsyncImage(source=img_url, allow_stretch=True, size_hint_x=0.1,
+                          size_hint_y=None, height=60)
+        self.viewerVideo.add_widget(icon)
         title = f' {y_title}   '
         self.video_label = Label(text=f"{counter}. {title}", color=(1, 0.9, 1, 1),
                                  size_hint_y=None, height=60, halign="left", valign="middle",
-                                 size_hint_x=0.7, font_name='Arial')
+                                 size_hint_x=0.59, font_name='Arial')
         self.video_label.bind(size=self.video_label.setter('text_size'))
         self.viewerVideo.height += self.video_label.height * 2
         self.viewerVideo.add_widget(self.video_label)
 
         self.video_folder = Label(text=folder_path, color=(1, 0.9, 1, 1),
                                   size_hint_y=None,
-                                  height=40, halign="left", valign="middle",
+                                  height=60, halign="left", valign="middle",
                                   size_hint_x=0.2)
         self.video_folder.bind(size=self.video_folder.setter('text_size'))
         self.viewerVideo.add_widget(self.video_folder)
 
         self.video_label2 = Label(text="", color=(1, 0.9, 1, 1),
                                   size_hint_y=None,
-                                  height=40, halign="right", valign="middle",
-                                  size_hint_x=0.05)
+                                  height=60, halign="right", valign="middle",
+                                  size_hint_x=0.06)
         self.video_label2.bind(size=self.video_label2.setter('text_size'))
         self.viewerVideo.add_widget(self.video_label2)
 
         test2 = f"0 %"
         self.video_label3 = Label(text=test2, color=(1, 0.9, 1, 1),
                                   size_hint_y=None,
-                                  height=40, halign="right", valign="middle",
-                                  size_hint_x=0.05)
+                                  height=60, halign="right", valign="middle",
+                                  size_hint_x=0.06)
         self.video_label3.bind(size=self.video_label3.setter('text_size'))
         self.viewerVideo.add_widget(self.video_label3)
 
