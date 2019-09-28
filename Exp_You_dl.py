@@ -11,6 +11,10 @@ from pytube.compat import unicode
 ydl_opts = {
     'format': '',
 }
+ydl_opts2 = {
+  'format': '',
+  'outtmpl': 'name.mp3'
+}
 # ---------------------
 """with youtube_dl.YoutubeDL(ydl_opts) as ydl:
     meta = ydl.extract_info('https://www.youtube.com/watch?v=Vi_xyV3Tj5Q', download=False)
@@ -38,7 +42,7 @@ quality_ids = {2160: [313],
                240: [133, 242],
                144: [160, 278]}
 
-maxx = '2160'
+maxx = '360'
 minn = '360'
 ids_quality = ""
 for k, v in quality_ids.items():
@@ -49,9 +53,11 @@ ydl_opts['format'] = ids_quality
 print(ids_quality)
 with youtube_dl.YoutubeDL(ydl_opts) as ydl:
     meta = ydl.extract_info('https://www.youtube.com/watch?v=Vi_xyV3Tj5Q', download=True)
-ydl_opts['format'] = 'bestaudio'
-with youtube_dl.YoutubeDL(ydl_opts) as ydl:
-  meta2 = ydl.extract_info('https://www.youtube.com/watch?v=Vi_xyV3Tj5Q', download=True)
+
+
+ydl_opts2['format'] = '249'
+with youtube_dl.YoutubeDL(ydl_opts2) as ydl:
+    meta2 = ydl.extract_info('https://www.youtube.com/watch?v=Vi_xyV3Tj5Q', download=True)
 
 class Downloader:
     def __init__(self, percentage_download_label, viewer_video, def_directory):
