@@ -33,13 +33,20 @@ class Down:
         video_opts['outtmpl'] = f"{self.folder_path}/{video_name}_v.mkv"
         audio_opts['outtmpl'] = f"{self.folder_path}/{video_name}_a.mp3"
         print(video)
-        with youtube_dl.YoutubeDL(video_opts) as ydl:
-            ydl.extract_info(video, download=True)
-        with youtube_dl.YoutubeDL(audio_opts) as ydl:
-            ydl.extract_info(video, download=True)
-        MergeVA().merge_va(video_opts['outtmpl'],
-                           audio_opts['outtmpl'],
-                           f"{self.folder_path}/{video_name}.mkv")
+        try:
+            with youtube_dl.YoutubeDL(video_opts) as ydl:
+                ydl.extract_info(video, download=True)
+            with youtube_dl.YoutubeDL(audio_opts) as ydl:
+                ydl.extract_info(video, download=True)
+            MergeVA().merge_va(video_opts['outtmpl'],
+                               audio_opts['outtmpl'],
+                               f"{self.folder_path}/{video_name}.mkv")
+        except Exception as e:
+            print(e)
+        finally:
+            os.remove(video_opts['outtmpl'])
+            os.remove(audio_opts['outtmpl'])
+
 
     def download(self, youtube_link, folder_path, quality_max, quality_min):
         self.folder_path = folder_path
@@ -80,9 +87,6 @@ class Down:
                                             counter=counter)
                     except Exception as e:
                         print(e)
-                    finally:
-                        os.remove(video_opts['outtmpl'])
-                        os.remove(audio_opts['outtmpl'])
                     counter += 1
 
     @staticmethod
