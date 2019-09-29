@@ -28,6 +28,13 @@ class Down:
                                          size_hint_y=None, height=40,
                                  halign="right", valign="middle")
 
+    @staticmethod
+    def my_hook(d):
+        p = d['downloaded_bytes']/d['total_bytes']*100
+        print(' ')
+        print(f"{p}        {d['speed']/1024}    {d['eta']/60}")
+
+
     def video_download(self, video_opts="", audio_opts="", video="", counter=0):
         with youtube_dl.YoutubeDL(video_opts) as ydl:
             video_meta = ydl.extract_info(video, download=False)
@@ -66,8 +73,8 @@ class Down:
         self.folder_path = folder_path
         if youtube_link:
             opts = {}
-            video_opts = {'format': '', 'outtmpl': ''}
-            audio_opts = {'format': '250/249/251', 'outtmpl': ''}
+            video_opts = {'format': '', 'outtmpl': '', 'progress_hooks': [self.my_hook]}
+            audio_opts = {'format': '250/249/251', 'outtmpl': '', 'progress_hooks': [self.my_hook]}
 
             quality_max = int(quality_max[0:-1])
             quality_min = int(quality_min[0:-1])
