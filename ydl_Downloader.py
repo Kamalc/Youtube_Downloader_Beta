@@ -132,36 +132,36 @@ class Down:
                           size_hint_y=None, height=60)
         self.viewerVideo.add_widget(icon)
         title = f' {y_title}   '
-        self.video_label = Label(text=f"{counter}. {title}", color=(1, 0.9, 1, 1),
+        self.video_label = Label(text=f"{counter}. {title}", color=(0.18, 0.49, 0.60, 1),
                                  size_hint_y=None, height=60, halign="left", valign="middle",
                                  size_hint_x=0.4, font_name='Arial')
         self.video_label.bind(size=self.video_label.setter('text_size'))
         self.viewerVideo.height += self.video_label.height * 2
         self.viewerVideo.add_widget(self.video_label)
 
-        self.Quality_label = Label(text="", color=(1, 0.9, 1, 1),
+        self.Quality_label = Label(text="", color=(0.18, 0.49, 0.60, 1),
                                    size_hint_y=None,
                                    height=60, halign="center", valign="middle",
                                    size_hint_x=0.06)
         self.Quality_label.bind(size=self.Quality_label.setter('text_size'))
         self.viewerVideo.add_widget(self.Quality_label)
 
-        self.video_folder = Label(text=folder_path, color=(1, 0.9, 1, 1),
+        self.video_folder = Label(text=folder_path, color=(0.18, 0.49, 0.60, 1),
                                   size_hint_y=None,
                                   height=60, halign="left", valign="middle",
                                   size_hint_x=0.1)
         self.video_folder.bind(size=self.video_folder.setter('text_size'))
         self.viewerVideo.add_widget(self.video_folder)
 
-        self.Size_label = Label(text=str(filesize)+"MB", color=(1, 0.9, 1, 1),
-                                      size_hint_y=None,
-                                      height=60, halign="center", valign="middle",
-                                      size_hint_x=0.1)
+        self.Size_label = Label(text=str(filesize)+"MB", color=(0.18, 0.49, 0.60, 1),
+                                size_hint_y=None,
+                                height=60, halign="center", valign="middle",
+                                size_hint_x=0.1)
         self.Size_label.bind(size=self.Size_label.setter('text_size'))
         self.viewerVideo.add_widget(self.Size_label)
 
         perc = f"0 %"
-        self.percentage_label = Label(text=perc, color=(1, 0.9, 1, 1),
+        self.percentage_label = Label(text=perc, color=(0.18, 0.49, 0.60, 1),
                                       size_hint_y=None,
                                       height=60, halign="right", valign="middle",
                                       size_hint_x=0.1)
