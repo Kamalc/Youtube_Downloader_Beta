@@ -23,8 +23,8 @@ from multiprocessing import Process
 
 Config.set('graphics', 'resizable', False)
 Window.clearcolor = (0.17, 0.17, 0.17, 1)
-Window.size = (650, 400)
-
+Window.size = (850, 400)
+Config.set('input', 'mouse', 'mouse,multitouch_on_demand')
 
 class HomePage(BoxLayout):
     def __init__(self, **kwargs):
@@ -103,7 +103,7 @@ class HomePage(BoxLayout):
 
         self.scroll = ScrollView()
 
-        self.viewerVideo = GridLayout(cols=5, size_hint_y=None, spacing=10, height=600, padding=2)
+        self.viewerVideo = GridLayout(cols=6, size_hint_y=None, spacing=10, height=600, padding=2)
 
         self.scroll.add_widget(self.viewerVideo)
 
