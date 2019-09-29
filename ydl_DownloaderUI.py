@@ -3,6 +3,8 @@ import math
 import re
 from threading import Thread
 from kivy.config import Config
+Config.set('graphics', 'resizable', False)
+
 from kivy.app import App
 from kivy.uix.label import Label
 from kivy.uix.button import Button
@@ -21,10 +23,11 @@ from ydl_Downloader import Down
 from functools import partial
 from multiprocessing import Process
 
-Config.set('graphics', 'resizable', False)
+Window.borderless = 0
 Window.clearcolor = (0.17, 0.17, 0.17, 1)
 Window.size = (850, 400)
 Config.set('input', 'mouse', 'mouse,multitouch_on_demand')
+
 
 class HomePage(BoxLayout):
     def __init__(self, **kwargs):
@@ -49,10 +52,10 @@ class HomePage(BoxLayout):
                                         size_hint_y=0.2))
         self.upperGrid.add_widget(Label(text="Youtube Downloader   |",
                                         font_size=35,
-                                        size_hint_x=0.4, size_hint_y=.2, color=(1, 0.8, 1, 1)))
+                                        size_hint_x=0.4, size_hint_y=.2, color=(0.18, 0.49, 0.60, 1)))
         self.percentageDownload_label = Label(text=f"{self.percentageDownload} %",
                                               font_size=20,
-                                              size_hint_x=0.2, size_hint_y=0.2, color=(1, 0.8, 1, 1))
+                                              size_hint_x=0.2, size_hint_y=0.2, color=(0.18, 0.49, 0.60, 1))
         self.upperGrid.add_widget(self.percentageDownload_label)
         self.add_widget(self.upperGrid)
 
@@ -71,35 +74,52 @@ class HomePage(BoxLayout):
         self.max_qualities = ['2160p', '1440p', '1080p', '720p', '480p', '360p', '240p', '144p']
         self.min_qualities = self.max_qualities[::-1]
 
-        self.quality_max = Button(text='Max Quality', size_hint=(None, None), height='48dp', color=(1, 0.9, 1, 1))
+        self.quality_max = Button(text='Max Quality', size_hint=(None, None), height='48dp', color=(0.22, 0.63, 0.78, 1))
         self.quality_max.bind(on_release=self.q_drop_down_max.open)
         self.q_drop_down_max.bind(on_select=lambda instance, q: setattr(self.quality_max, 'text', q))
         for quality in self.max_qualities:
-            btn1 = Button(text=quality, size_hint_y=None, height=48, color=(1, 0.9, 1, 1))
+            btn1 = Button(text=quality, size_hint_y=None, height=48, color=(0.22, 0.63, 0.78, 1))
             btn1.bind(on_release=lambda btn1: self.q_drop_down_max.select(btn1.text))
             self.q_drop_down_max.add_widget(btn1)
         self.midGrid.add_widget(self.quality_max)
 
-        self.quality_min = Button(text='Min Quality', size_hint=(None, None), height='48dp', color=(1, 0.9, 1, 1))
+        self.quality_min = Button(text='Min Quality', size_hint=(None, None), height='48dp', color=(0.22, 0.63, 0.78, 1))
         self.quality_min.bind(on_release=self.q_drop_down_min.open)
         self.q_drop_down_min.bind(on_select=lambda instance, q: setattr(self.quality_min, 'text', q))
         for quality in self.min_qualities:
-            btn2 = Button(text=quality, size_hint_y=None, height=48, color=(1, 0.9, 1, 1))
+            btn2 = Button(text=quality, size_hint_y=None, height=48, color=(0.22, 0.63, 0.78, 1))
             btn2.bind(on_release=lambda btn2: self.q_drop_down_min.select(btn2.text))
             self.q_drop_down_min.add_widget(btn2)
         self.midGrid.add_widget(self.quality_min)
 
-        self.v_download = Button(text="Download", size_hint_x=0.6, color=(1, 0.9, 1, 1))
+        self.v_download = Button(text="Download", size_hint_x=0.6, color=(0.22, 0.63, 0.78, 1),
+                                 font_size=20)
 
         self.v_download.bind(on_press=self.start_download)
         self.midGrid.add_widget(self.v_download)
 
-        self.directory_btn = Button(text="Browse", size_hint_x=0.1, color=(1, 0.9, 1, 1))
+        self.directory_btn = Button(text="Browse", size_hint_x=0.1, color=(0.22, 0.63, 0.78, 1))
         self.directory_btn.bind(on_release=self.choose_directory)
         self.midGrid.add_widget(self.directory_btn)
         #icon = AsyncImage(source='https://i.ytimg.com/vi/ACRAptyOwls/maxresdefault.jpg',
         #                  allow_stretch=True, size_hint_x=0.1)
         #self.midGrid.add_widget(icon)
+
+        self.viewer_header = GridLayout(cols=6, size_hint_y=0.1, spacing=10, padding=2)
+        self.img_header_label = Label(text="Thumbnail", size_hint_x=0.1)
+        self.viewer_header.add_widget(self.img_header_label)
+        self.name_header_label = Label(text="Name", size_hint_x=0.4)
+        self.viewer_header.add_widget(self.name_header_label)
+        self.q_header_label = Label(text="Quality", size_hint_x=0.06)
+        self.viewer_header.add_widget(self.q_header_label)
+        self.dir_header_label = Label(text="Folder Path", size_hint_x=0.1)
+        self.viewer_header.add_widget(self.dir_header_label)
+        self.size_header_label = Label(text="Size", size_hint_x=0.1)
+        self.viewer_header.add_widget(self.size_header_label)
+        self.per_header_label = Label(text="Percentage", size_hint_x=0.1)
+        self.viewer_header.add_widget(self.per_header_label)
+        self.add_widget(self.viewer_header)
+
 
         self.scroll = ScrollView()
 
@@ -110,9 +130,9 @@ class HomePage(BoxLayout):
         self.add_widget(self.scroll)
 
         self.lower_grid = GridLayout(cols=2, size_hint_y=0.1)
-        self.clear_btn = Button(text="Clear", color=(1, 0.9, 1, 1))
+        self.clear_btn = Button(text="Clear", color=(0.22, 0.63, 0.78, 1))
         self.clear_btn.bind(on_press=self.clear_viewer)
-        self.stop_btn = Button(text="Pause Download", color=(1, 0.9, 1, 1))
+        self.stop_btn = Button(text="Pause Download", color=(0.22, 0.63, 0.78, 1))
         self.stop_btn.bind(on_release=self.stop_fn_btn)
         self.lower_grid.add_widget(self.clear_btn)
         self.lower_grid.add_widget(self.stop_btn)
@@ -120,7 +140,7 @@ class HomePage(BoxLayout):
         self.add_widget(self.lower_grid)
         # --- Pop Up Screen -------------------------------------------
         self.directory_window = Popup(title="Directory", content=self.show_popup, size_hint=(None, None),
-                                      size=(500, 400))
+                                      size=(500, 400), title_color=(0.18, 0.49, 0.60, 1))
         self.show_popup.cancel_btn.bind(on_release=self.directory_window.dismiss)
         self.show_popup.select_btn.bind(on_release=self.choose_folder)
         self.show_popup.path_Text.text = self.def_directory
@@ -205,7 +225,7 @@ class PopU(BoxLayout):
         print(self.partitions_caption)
         self.partitions_btn = GridLayout(cols=10, rows=1, size_hint_y=0.1, spacing=2)
         for partition in self.partitions_caption:
-            self.part_btn = Button(text=partition, id=partition+"\\")
+            self.part_btn = Button(text=partition, id=partition+"\\", color=(0.22, 0.63, 0.78, 1))
             #self.part_btn.bind(on_release=lambda *args: self.change_main_direct(self.part_btn.id, *args))
             self.part_btn.bind(on_release=partial(self.change_main_direct, self.part_btn.id))
             #print(self.part_btn.id)
@@ -228,8 +248,8 @@ class PopU(BoxLayout):
         self.add_widget(self.file_chooser_list)
 
         self.buttons_grid = GridLayout(cols=2, rows=2, size_hint_y=0.1, spacing=2)
-        self.select_btn = Button(text="Select", size_hint=(0.4, 0.1))
-        self.cancel_btn = Button(text="Cancel", size_hint=(0.4, 0.1))
+        self.select_btn = Button(text="Select", size_hint=(0.4, 0.1), color=(0.22, 0.63, 0.78, 1))
+        self.cancel_btn = Button(text="Cancel", size_hint=(0.4, 0.1), color=(0.22, 0.63, 0.78, 1))
 
         self.buttons_grid.add_widget(self.select_btn)
         self.buttons_grid.add_widget(self.cancel_btn)
