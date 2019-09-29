@@ -30,9 +30,12 @@ class Down:
 
     @staticmethod
     def my_hook(d):
-        p = d['downloaded_bytes']/d['total_bytes']*100
-        print(' ')
-        print(f"{p}        {d['speed']/1024}    {d['eta']/60}")
+        if d['status'] == 'downloading':
+            p = d['downloaded_bytes']/d['total_bytes']*100
+            print(' ')
+            print(f"{p}        {d['speed']/1024}    {d['eta']/60}")
+        else:
+            print(d['status'])
 
 
     def video_download(self, video_opts="", audio_opts="", video="", counter=0):
