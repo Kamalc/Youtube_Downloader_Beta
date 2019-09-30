@@ -138,7 +138,9 @@ class Down:
                           size_hint_y=None, height=60)
         self.viewerVideo.add_widget(icon)
         title = f' {y_title}   '
-        self.video_label = Label(text=f"{counter}. {title}", color=(0.18, 0.49, 0.60, 1),
+        if counter:
+            title = f"{counter}. {title}"
+        self.video_label = Label(text = title, color=(0.18, 0.49, 0.60, 1),
                                  size_hint_y=None, height=60, halign="left", valign="middle",
                                  size_hint_x=0.4, font_name='Arial')
         self.video_label.bind(size=self.video_label.setter('text_size'))
