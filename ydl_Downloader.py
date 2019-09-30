@@ -8,7 +8,6 @@ from pytube.compat import unicode
 from kivy.uix.label import Label
 from kivy.uix.image import Image, AsyncImage
 
-
 class Down:
     def __init__(self, percentageDownload_label, viewerVideo, def_directory):
         self.folder_path = ''
