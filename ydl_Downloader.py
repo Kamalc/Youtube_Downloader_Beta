@@ -7,6 +7,8 @@ import re
 from pytube.compat import unicode
 from kivy.uix.label import Label
 from kivy.uix.image import Image, AsyncImage
+from Str_Converter import convert_vtt_to_srt
+
 
 class Down:
     def __init__(self, percentageDownload_label, viewerVideo, def_directory):
@@ -61,10 +63,11 @@ class Down:
 
         video_opts['outtmpl'] = f"{self.folder_path}/{video_name}_v.mkv"
         audio_opts['outtmpl'] = f"{self.folder_path}/{video_name}_a.mp3"
+        sub_vtt = f"{self.folder_path}/{video_name}_v.en.vtt"
         print(video)
         try:
             self.making_viewer_ui(counter, video_title, self.folder_path, f"{video_meta['thumbnail']}",
-                                                    video_meta['filesize'],audio_meta['filesize'])
+                                                        video_meta['filesize'], audio_meta['filesize'])
             with youtube_dl.YoutubeDL(video_opts) as ydl:
                 self.Quality_label.text = f"{video_meta['height']}P"
                 ydl.extract_info(video, download=True)
@@ -75,6 +78,7 @@ class Down:
             MergeVA().merge_va(video_opts['outtmpl'],
                                audio_opts['outtmpl'],
                                f"{self.folder_path}/{video_name}.mkv")
+            convert_vtt_to_srt(sub_vtt)
             self.video_label.color = (0.13, 0.83, 0.25, 1)
         except Exception as e:
             print(f"Can't download Video/Audio: {e}")
@@ -89,7 +93,9 @@ class Down:
         self.folder_path = folder_path
         if youtube_link:
             opts = {}
-            video_opts = {'format': '', 'outtmpl': '', 'progress_hooks': [self.my_hook]}
+            video_opts = {'format': '', 'outtmpl': '', 'progress_hooks': [self.my_hook],
+                          'writesubtitles': True, 'allsubtitles': False, 'subtitleslangs': ['en']}
+                          # IF auto make writesubtitles to False , 'writeautomaticsub': True}
             audio_opts = {'format': '250/249/251', 'outtmpl': '', 'progress_hooks': [self.my_hook]}
 
             quality_max = int(quality_max[0:-1])
@@ -130,7 +136,7 @@ class Down:
         if file_size_v or file_size_a is None:
             file_size = 0
         else:
-            file_size = int(file_size_v)+int(file_size_a)
+            file_size = file_size_v+file_size_a
         file_size = round(file_size/1024/1024, 2)
 
         icon = AsyncImage(source=img_url, allow_stretch=True, size_hint_x=0.1,
