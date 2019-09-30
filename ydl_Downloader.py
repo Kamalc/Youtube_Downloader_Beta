@@ -47,6 +47,40 @@ class Down:
         except:
             print("\n")
 
+    def audio_download(self, audio_opts="", link="", counter=0, just_mp3=False):
+        print("audio")
+        with youtube_dl.YoutubeDL(audio_opts) as ydl:
+            audio_meta = ydl.extract_info(link, download=False)
+
+        audio_title = self.filename(audio_meta['title'])
+        if counter:
+            audio_name = f"{self.get_cnt(counter)}{audio_title}"
+        else:
+            audio_name = f"{audio_title}"
+        audio_opts['outtmpl'] = f"{self.folder_path}/{audio_name}"
+        print(audio_opts['outtmpl'])
+        if not just_mp3:
+            audio_opts['outtmpl'] += "_a"
+
+        audio_opts['outtmpl'] += ".mp3"
+
+        try:
+            if just_mp3:
+                self.making_viewer_ui(counter, audio_title, self.folder_path, f"{audio_meta['thumbnail']}",
+                                      audio_meta['filesize'], audio_meta['filesize'])
+                self.Quality_label.text = "MP3"
+                if os.path.exists(audio_opts['outtmpl']):
+                    os.remove(audio_opts['outtmpl'])
+
+            with youtube_dl.YoutubeDL(audio_opts) as ydl:
+                ydl.extract_info(link, download=True)
+
+            if just_mp3:
+                self.video_label.color = (0.13, 0.83, 0.25, 1)
+        except Exception as e:
+            print(f"Can't download Audio: {e}")
+            self.video_label.color = (1, 0, 0, 1)
+
     def video_download(self, video_opts="", audio_opts="", video="", counter=0):
         with youtube_dl.YoutubeDL(video_opts) as ydl:
             video_meta = ydl.extract_info(video, download=False)
@@ -66,7 +100,7 @@ class Down:
         print(video)
         try:
             self.making_viewer_ui(counter, video_title, self.folder_path, f"{video_meta['thumbnail']}",
-                                                        video_meta['filesize'], audio_meta['filesize'])
+                                  video_meta['filesize'], audio_meta['filesize'])
             with youtube_dl.YoutubeDL(video_opts) as ydl:
                 self.Quality_label.text = f"{video_meta['height']}P"
                 ydl.extract_info(video, download=True)
@@ -93,7 +127,8 @@ class Down:
         if youtube_link:
             opts = {}
             video_opts = {'format': '', 'outtmpl': '', 'progress_hooks': [self.my_hook],
-                          'writesubtitles': True, 'allsubtitles': False, 'subtitleslangs': ['en']}
+                          #'writesubtitles': True, 'allsubtitles': False, 'subtitleslangs': ['en']
+                          }
                           # IF auto make writesubtitles to False , 'writeautomaticsub': True}
             audio_opts = {'format': '250/249/251', 'outtmpl': '', 'progress_hooks': [self.my_hook]}
 
@@ -109,7 +144,10 @@ class Down:
                 meta = ydl.extract_info(youtube_link, download=False)
             print(meta['extractor']+'********************************************')
             if meta['extractor'] == 'youtube':# if u put link video at playlist will download play list not one video
-                self.video_download(video_opts=video_opts, audio_opts=audio_opts, video=youtube_link)
+                if audio_checker:
+                    self.audio_download(audio_opts=audio_opts, link=youtube_link, just_mp3=True)
+                else:
+                    self.video_download(video_opts=video_opts, audio_opts=audio_opts, video=youtube_link)
             else:
                 counter = 1
                 video_list = []
@@ -125,8 +163,13 @@ class Down:
 
                 for video in video_list:
                     try:
-                        self.video_download(video_opts=video_opts, audio_opts=audio_opts, video=video,
-                                            counter=counter)
+                        if audio_checker.active:
+                            self.audio_download(audio_opts=audio_opts, link=video,
+                                                counter=counter, just_mp3=True)
+                        else:
+                            self.video_download(video_opts=video_opts, audio_opts=audio_opts, video=video,
+                                                counter=counter)
+
                     except Exception as e:
                         print(e)
                     counter += 1
