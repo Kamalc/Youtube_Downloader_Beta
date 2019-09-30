@@ -11,7 +11,7 @@ from Str_Converter import convert_vtt_to_srt
 
 
 class Down:
-    def __init__(self, percentageDownload_label, viewerVideo, def_directory):
+    def __init__(self, percentageDownload_label, viewerVideo):
         self.folder_path = ''
         self.playlistLen = 0
         self.quality_ids = {2160: [313],
@@ -24,7 +24,6 @@ class Down:
                             144: [160, 278]}
         self.percentageDownload_label = percentageDownload_label
         self.viewerVideo = viewerVideo
-        self.def_directory = def_directory
         self.Quality_label = Label(text="", color=(0.5, 0.5, 0.5, 1),
                                    size_hint_y=None, height=40,
                                    halign="right", valign="middle")
@@ -89,7 +88,7 @@ class Down:
             if os.path.exists(audio_opts['outtmpl']):
                 os.remove(audio_opts['outtmpl'])
 
-    def download(self, youtube_link, folder_path, quality_max, quality_min):
+    def download(self, youtube_link, folder_path, quality_max, quality_min, audio_checker):
         self.folder_path = folder_path
         if youtube_link:
             opts = {}
@@ -145,7 +144,7 @@ class Down:
         title = f' {y_title}   '
         if counter:
             title = f"{counter}. {title}"
-        self.video_label = Label(text = title, color=(0.18, 0.49, 0.60, 1),
+        self.video_label = Label(text=title, color=(0.18, 0.49, 0.60, 1),
                                  size_hint_y=None, height=60, halign="left", valign="middle",
                                  size_hint_x=0.4, font_name='Arial')
         self.video_label.bind(size=self.video_label.setter('text_size'))
@@ -159,7 +158,7 @@ class Down:
         self.Quality_label.bind(size=self.Quality_label.setter('text_size'))
         self.viewerVideo.add_widget(self.Quality_label)
 
-        self.video_folder = Label(text=folder_path, color=(0.18, 0.49, 0.60, 1),
+        self.video_folder = Label(text="", color=(0.18, 0.49, 0.60, 1),
                                   size_hint_y=None,
                                   height=60, halign="left", valign="middle",
                                   size_hint_x=0.1)

@@ -13,6 +13,7 @@ from kivy.uix.gridlayout import GridLayout
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.dropdown import DropDown
 from kivy.uix.scrollview import ScrollView
+from kivy.uix.checkbox import CheckBox
 from kivy.uix.popup import Popup
 from kivy.uix.image import AsyncImage
 from kivy.uix.filechooser import FileChooser, FileChooserListView, FileChooserIconView
@@ -48,21 +49,30 @@ class HomePage(BoxLayout):
         self.upperGrid.cols = 3
         self.upperGrid.size_hint_y = 0.30
 
-        self.upperGrid.add_widget(Label(text="", size_hint_x=0.2,
-                                        size_hint_y=0.2))
-        self.upperGrid.add_widget(Label(text="Youtube Downloader   |",
+        self.options_btn = Button(text="Options", size_hint_x=0.2, color=(0.22, 0.63, 0.78, 1))
+        self.upperGrid.add_widget(self.options_btn)
+        self.upperGrid.add_widget(Label(text="Youtube Downloader",
                                         font_size=35,
-                                        size_hint_x=0.4, size_hint_y=.2, color=(0.18, 0.49, 0.60, 1)))
-        self.percentageDownload_label = Label(text=f"{self.percentageDownload} %",
-                                              font_size=20,
-                                              size_hint_x=0.2, size_hint_y=0.2, color=(0.18, 0.49, 0.60, 1))
-        self.upperGrid.add_widget(self.percentageDownload_label)
+                                        size_hint_x=0.6, size_hint_y=.2, color=(0.18, 0.49, 0.60, 1)))
+        self.upperLeftGrid = GridLayout(cols=1, rows=2, size_hint_x=0.2)
+        self.speed_header_label = Label(text=f"Speed",
+                                              font_size=15, size_hint_y=0.5, color=(0.18, 0.49, 0.60, 1))
+        self.speed_label = Label(text=f"0.0 KB/s",
+                                              font_size=20, size_hint_y=0.5, color=(0.22, 0.63, 0.78, 1))
+        self.upperLeftGrid.add_widget(self.speed_header_label)
+        self.upperLeftGrid.add_widget(self.speed_label)
+        self.upperGrid.add_widget(self.upperLeftGrid)
         self.add_widget(self.upperGrid)
 
-        self.play_link = TextInput(multiline=False, size_hint_y=0.15)
-        self.add_widget(self.play_link)
+        self.text_dir = GridLayout(cols=2, size_hint_y=0.15)
+        self.play_link = TextInput(multiline=False, size_hint_x=0.8)
+        self.dir_label = Label(text=self.def_directory, size_hint_x=0.2,
+                               halign='left', color=(0.18, 0.49, 0.60, 1))
+        self.text_dir.add_widget(self.play_link)
+        self.text_dir.add_widget(self.dir_label)
+        self.add_widget(self.text_dir)
 
-        self.midGrid = GridLayout(cols=5)
+        self.midGrid = GridLayout(cols=6)
         self.add_widget(self.midGrid)
         self.midGrid.orientation = 4, 'vertical'
         self.midGrid.size_hint_y = 0.21
@@ -92,15 +102,21 @@ class HomePage(BoxLayout):
             self.q_drop_down_min.add_widget(btn2)
         self.midGrid.add_widget(self.quality_min)
 
+        self.grid_audio_checker = GridLayout(cols=1, rows=2, size_hint_x=0.05)
+        self.audio_checker = CheckBox()
+        self.grid_audio_checker.add_widget(Label(text="MP3", color=(0.18, 0.49, 0.60, 1)))
+        self.grid_audio_checker.add_widget(self.audio_checker)
+        self.midGrid.add_widget(self.grid_audio_checker)
+
         self.v_download = Button(text="Download", size_hint_x=0.6, color=(0.22, 0.63, 0.78, 1),
                                  font_size=20)
 
         self.v_download.bind(on_press=self.start_download)
         self.midGrid.add_widget(self.v_download)
 
-        self.directory_btn = Button(text="Browse", size_hint_x=0.1, color=(0.22, 0.63, 0.78, 1))
-        self.directory_btn.bind(on_release=self.choose_directory)
-        self.midGrid.add_widget(self.directory_btn)
+        self.browse_btn = Button(text="Browse", size_hint_x=0.1, color=(0.22, 0.63, 0.78, 1))
+        self.browse_btn.bind(on_release=self.choose_directory)
+        self.midGrid.add_widget(self.browse_btn)
 
         self.viewer_header = GridLayout(cols=6, size_hint_y=0.1, spacing=10, padding=2)
         self.img_header_label = Label(text="Thumbnail", size_hint_x=0.1, color=(0.18, 0.49, 0.60, 1))
@@ -109,7 +125,7 @@ class HomePage(BoxLayout):
         self.viewer_header.add_widget(self.name_header_label)
         self.q_header_label = Label(text="Quality", size_hint_x=0.06, color=(0.18, 0.49, 0.60, 1))
         self.viewer_header.add_widget(self.q_header_label)
-        self.dir_header_label = Label(text="Folder Path", size_hint_x=0.1, color=(0.18, 0.49, 0.60, 1))
+        self.dir_header_label = Label(text="ETA", size_hint_x=0.1, color=(0.18, 0.49, 0.60, 1))
         self.viewer_header.add_widget(self.dir_header_label)
         self.size_header_label = Label(text="Size", size_hint_x=0.1, color=(0.18, 0.49, 0.60, 1))
         self.viewer_header.add_widget(self.size_header_label)
@@ -143,7 +159,7 @@ class HomePage(BoxLayout):
         self.show_popup.file_chooser_list.path = self.def_directory
         self.kill_download = False
         # -------------------------------------------------------------
-        self.downloader = Down(self.percentageDownload_label, self.viewerVideo, self.def_directory)
+        self.downloader = Down(self.speed_label, self.viewerVideo)
         self.download = Process()
         self.download2 = Process()
         self.paused = False
@@ -166,6 +182,7 @@ class HomePage(BoxLayout):
             #self.download2.start()
 
     def choose_directory(self, instance):
+        self.show_popup.path_Text.text = self.def_directory
         self.directory_window.open()
 
     def start_download(self, instance):
@@ -178,7 +195,8 @@ class HomePage(BoxLayout):
                                     args=(self.play_link.text,
                                           self.def_directory,
                                           self.quality_max.text,
-                                          self.quality_min.text))
+                                          self.quality_min.text,
+                                          self.audio_checker))
             print("Downloading")
             self.download.daemon = True
             #self.download2 = Process(target=self.download)
@@ -201,6 +219,8 @@ class HomePage(BoxLayout):
         print(self.show_popup.path_Text.text)
         if self.show_popup.path_Text.text:
             self.path_folder(self.show_popup.path_Text.text)
+            self.def_directory = self.show_popup.path_Text.text
+            self.dir_label.text = self.def_directory
         self.directory_window.dismiss()
 
     # # ---- Functions ---- # #
