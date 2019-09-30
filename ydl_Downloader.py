@@ -175,7 +175,7 @@ class Down:
 
     def making_viewer_ui(self, counter, y_title, folder_path, img_url, file_size_v, file_size_a):
         print(file_size_a, file_size_v)
-        if file_size_v is 'None' or file_size_a is 'None':
+        if file_size_v is None or file_size_a is None:
             file_size = 0
         else:
             file_size = file_size_v+file_size_a
