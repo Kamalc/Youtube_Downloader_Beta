@@ -31,6 +31,7 @@ class Down:
                                       size_hint_y=None,
                                       height=60, halign="right", valign="middle",
                                       size_hint_x=0.06)
+        self.video_label = Label()
 
     @staticmethod
     def my_hook(d):
@@ -38,7 +39,7 @@ class Down:
             if d['status'] == 'downloading':
                 p = d['downloaded_bytes']/d['total_bytes']*100
                 print(' ')
-                print(f"{p}        {d['speed']/1024}    {d['eta']/60}")
+                print(f"{round(p,2)}%    {round(d['speed']/1024,2)}KB/S    {d['eta']/60}")
                 #self.percentage_label.text = f"{int(d['speed']/1024)} KB  |  {p} %"
             else:
                 print(d['status'])
@@ -46,12 +47,13 @@ class Down:
         except:
             print("\n")
 
-
     def video_download(self, video_opts="", audio_opts="", video="", counter=0):
         with youtube_dl.YoutubeDL(video_opts) as ydl:
             video_meta = ydl.extract_info(video, download=False)
+            #print(video_meta['filesize'])
         with youtube_dl.YoutubeDL(audio_opts) as ydl:
             audio_meta = ydl.extract_info(video, download=False)
+            #print(audio_meta['filesize'])
         video_title = self.filename(video_meta['title'])
         if counter:
             video_name = f"{self.get_cnt(counter)}{video_title}"
@@ -63,7 +65,7 @@ class Down:
         print(video)
         try:
             self.making_viewer_ui(counter, video_title, self.folder_path, f"{video_meta['thumbnail']}",
-                                  video_meta['filesize']+audio_meta['filesize'])
+                                                    video_meta['filesize'],audio_meta['filesize'])
             with youtube_dl.YoutubeDL(video_opts) as ydl:
                 self.Quality_label.text = f"{video_meta['height']}P"
                 ydl.extract_info(video, download=True)
@@ -125,8 +127,12 @@ class Down:
                         print(e)
                     counter += 1
 
-    def making_viewer_ui(self, counter, y_title, folder_path, img_url, filesize):
-        filesize = round(filesize/1024/1024, 2)
+    def making_viewer_ui(self, counter, y_title, folder_path, img_url, file_size_v, file_size_a):
+        if file_size_v or file_size_a is None:
+            file_size = 0
+        else:
+            file_size = int(file_size_v)+int(file_size_a)
+        file_size = round(file_size/1024/1024, 2)
 
         icon = AsyncImage(source=img_url, allow_stretch=True, size_hint_x=0.1,
                           size_hint_y=None, height=60)
@@ -153,7 +159,9 @@ class Down:
         self.video_folder.bind(size=self.video_folder.setter('text_size'))
         self.viewerVideo.add_widget(self.video_folder)
 
-        self.Size_label = Label(text=str(filesize)+"MB", color=(0.18, 0.49, 0.60, 1),
+        if file_size is 0:
+            file_size = "Unknown Size"
+        self.Size_label = Label(text=str(file_size)+"MB", color=(0.18, 0.49, 0.60, 1),
                                 size_hint_y=None,
                                 height=60, halign="center", valign="middle",
                                 size_hint_x=0.1)

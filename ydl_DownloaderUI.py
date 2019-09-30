@@ -59,7 +59,7 @@ class HomePage(BoxLayout):
         self.upperGrid.add_widget(self.percentageDownload_label)
         self.add_widget(self.upperGrid)
 
-        self.play_link = TextInput(multiline=False, size_hint_y=0.13)
+        self.play_link = TextInput(multiline=False, size_hint_y=0.15)
         self.add_widget(self.play_link)
 
         self.midGrid = GridLayout(cols=5)
@@ -101,9 +101,6 @@ class HomePage(BoxLayout):
         self.directory_btn = Button(text="Browse", size_hint_x=0.1, color=(0.22, 0.63, 0.78, 1))
         self.directory_btn.bind(on_release=self.choose_directory)
         self.midGrid.add_widget(self.directory_btn)
-        #icon = AsyncImage(source='https://i.ytimg.com/vi/ACRAptyOwls/maxresdefault.jpg',
-        #                  allow_stretch=True, size_hint_x=0.1)
-        #self.midGrid.add_widget(icon)
 
         self.viewer_header = GridLayout(cols=6, size_hint_y=0.1, spacing=10, padding=2)
         self.img_header_label = Label(text="Thumbnail", size_hint_x=0.1, color=(0.18, 0.49, 0.60, 1))
@@ -119,7 +116,6 @@ class HomePage(BoxLayout):
         self.per_header_label = Label(text="Percentage", size_hint_x=0.1, color=(0.18, 0.49, 0.60, 1))
         self.viewer_header.add_widget(self.per_header_label)
         self.add_widget(self.viewer_header)
-
 
         self.scroll = ScrollView()
 
@@ -193,8 +189,8 @@ class HomePage(BoxLayout):
     def clear_viewer(self, instance):
         clear_viewer = Thread(target=self.viewerVideo.clear_widgets)
         #clear_viewer = Thread(target=self.clearing)
-        #clear_viewer.daemon = True
-        #clear_viewer.start()
+        clear_viewer.daemon = True
+        clear_viewer.start()
 
     def clearing(self):
         print(self.viewerVideo.children[:4])
