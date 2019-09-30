@@ -160,7 +160,6 @@ class Down:
                     video_list.append(k['webpage_url'])
 
                 self.playlistLen = len(video_list)
-
                 for video in video_list:
                     try:
                         if audio_checker.active:
@@ -175,7 +174,8 @@ class Down:
                     counter += 1
 
     def making_viewer_ui(self, counter, y_title, folder_path, img_url, file_size_v, file_size_a):
-        if file_size_v or file_size_a is None:
+        print(file_size_a, file_size_v)
+        if file_size_v is 'None' or file_size_a is 'None':
             file_size = 0
         else:
             file_size = file_size_v+file_size_a

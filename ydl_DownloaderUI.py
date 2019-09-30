@@ -23,11 +23,48 @@ from kivy.core.window import Window
 from ydl_Downloader import Down
 from functools import partial
 from multiprocessing import Process
+import threading
 
 Window.borderless = 0
 Window.clearcolor = (0.17, 0.17, 0.17, 1)
 Window.size = (850, 400)
 Config.set('input', 'mouse', 'mouse,multitouch_on_demand')
+# --------------------------------------------------------
+import ctypes
+
+def terminate_thread(thread):
+    """Terminates a python thread from another thread.
+
+    :param thread: a threading.Thread instance
+    """
+    if not thread.isAlive():
+        return
+
+    exc = ctypes.py_object(SystemExit)
+    res = ctypes.pythonapi.PyThreadState_SetAsyncExc(
+        ctypes.c_long(thread.ident), exc)
+    if res == 0:
+        raise ValueError("nonexistent thread id")
+    elif res > 1:
+        # """if it returns a number greater than one, you're in trouble,
+        # and you should call it again with exc=NULL to revert the effect"""
+        ctypes.pythonapi.PyThreadState_SetAsyncExc(thread.ident, None)
+        raise SystemError("PyThreadState_SetAsyncExc failed")
+
+
+class BaseThread(threading.Thread):
+    def __init__(self, callback=None, callback_args=None, *args, **kwargs):
+        target = kwargs.pop('target')
+        super(BaseThread, self).__init__(target=self.target_with_callback, *args, **kwargs)
+        self.callback = callback
+        self.method = target
+        self.callback_args = callback_args
+
+    def target_with_callback(self):
+        self.method()
+        if self.callback is not None:
+            self.callback(*self.callback_args)
+# --------------------------------------------------------
 
 
 class HomePage(BoxLayout):
@@ -64,13 +101,16 @@ class HomePage(BoxLayout):
         self.upperGrid.add_widget(self.upperLeftGrid)
         self.add_widget(self.upperGrid)
 
-        self.text_dir = GridLayout(cols=2, size_hint_y=0.15)
-        self.play_link = TextInput(multiline=False, size_hint_x=0.8)
-        self.dir_label = Label(text=self.def_directory, size_hint_x=0.2,
-                               halign='left', color=(0.18, 0.49, 0.60, 1))
-        self.text_dir.add_widget(self.play_link)
-        self.text_dir.add_widget(self.dir_label)
-        self.add_widget(self.text_dir)
+        #self.text_dir = GridLayout(cols=2, rows=1, size_hint_y=0.18, padding=2, spacing=2)
+        self.play_link = TextInput(multiline=False, size_hint=(1, 0.16))
+        self.dir_label = Label(text=self.def_directory, size_hint=(1, 0.1), halign='left',
+                               color=(0.18, 0.49, 0.60, 1))
+        self.dir_label.bind(size=self.dir_label.setter('text_size'))
+        #self.text_dir.add_widget(self.play_link)
+        #self.text_dir.add_widget(self.dir_label)
+        self.add_widget(self.play_link)
+        self.add_widget(self.dir_label)
+
 
         self.midGrid = GridLayout(cols=6)
         self.add_widget(self.midGrid)
@@ -118,10 +158,11 @@ class HomePage(BoxLayout):
         self.browse_btn.bind(on_release=self.choose_directory)
         self.midGrid.add_widget(self.browse_btn)
 
-        self.viewer_header = GridLayout(cols=6, size_hint_y=0.1, spacing=10, padding=2)
+        self.viewer_header = GridLayout(cols=6, size_hint_y=0.2, spacing=10, padding=2)
         self.img_header_label = Label(text="Thumbnail", size_hint_x=0.1, color=(0.18, 0.49, 0.60, 1))
         self.viewer_header.add_widget(self.img_header_label)
-        self.name_header_label = Label(text="Name", size_hint_x=0.4, color=(0.18, 0.49, 0.60, 1))
+        self.name_header_label = Label(text="Name", size_hint_x=0.4, color=(0.18, 0.49, 0.60, 1),
+                                       halign='left')
         self.viewer_header.add_widget(self.name_header_label)
         self.q_header_label = Label(text="Quality", size_hint_x=0.06, color=(0.18, 0.49, 0.60, 1))
         self.viewer_header.add_widget(self.q_header_label)
@@ -144,8 +185,9 @@ class HomePage(BoxLayout):
         self.lower_grid = GridLayout(cols=2, size_hint_y=0.1)
         self.clear_btn = Button(text="Clear", color=(0.22, 0.63, 0.78, 1))
         self.clear_btn.bind(on_press=self.clear_viewer)
-        self.stop_btn = Button(text="Pause Download", color=(0.22, 0.63, 0.78, 1))
+        self.stop_btn = Button(text="Stop Download", color=(0.22, 0.63, 0.78, 1))
         self.stop_btn.bind(on_release=self.stop_fn_btn)
+        self.stop_btn.disabled = True
         self.lower_grid.add_widget(self.clear_btn)
         self.lower_grid.add_widget(self.stop_btn)
 
@@ -160,8 +202,7 @@ class HomePage(BoxLayout):
         self.kill_download = False
         # -------------------------------------------------------------
         self.downloader = Down(self.speed_label, self.viewerVideo)
-        self.download = Process()
-        self.download2 = Process()
+        self.download = BaseThread
         self.paused = False
     # ...............................................................................
     # # -- Event Functions -- # #
@@ -172,14 +213,15 @@ class HomePage(BoxLayout):
         t.start()
 
     def stop_fn_btn(self, instance):
-        if not self.paused:
-            self.stop_btn.text = "Resume Download"
-            self.paused = True
-            #self.download2.terminate()
-        else:
-            self.stop_btn.text = "Pause Download"
-            self.paused = False
-            #self.download2.start()
+        #if not self.paused:
+            #self.stop_btn.text = "Resume Download"
+        self.paused = True
+        terminate_thread(self.download)
+        self.enable_Fn()
+        #else:
+            #self.stop_btn.text = "Pause Download"
+            #self.paused = False
+            #self.start_download
 
     def choose_directory(self, instance):
         self.show_popup.path_Text.text = self.def_directory
@@ -187,22 +229,23 @@ class HomePage(BoxLayout):
 
     def start_download(self, instance):
         if self.quality_max.text == 'Max Quality':
-            self.quality_max.text = '2160p'
+            self.quality_max.text = '1080p'
         if self.quality_min.text == 'Min Quality':
             self.quality_min.text = '144p'
         if self.play_link.text:
-            self.download = Thread(target=self.downloader.download,
-                                    args=(self.play_link.text,
-                                          self.def_directory,
-                                          self.quality_max.text,
-                                          self.quality_min.text,
-                                          self.audio_checker))
+            self.disable_Fn()
+            self.download = BaseThread(target=self.download_target, callback=self.enable_Fn,
+                                       callback_args=())
             print("Downloading")
             self.download.daemon = True
-            #self.download2 = Process(target=self.download)
             self.download.start()
         else:
             print("No input to download")
+
+    def download_target(self):
+        self.downloader.download(self.play_link.text, self.def_directory,
+                                 self.quality_max.text, self.quality_min.text,
+                                 self.audio_checker)
 
     def clear_viewer(self, instance):
         clear_viewer = Thread(target=self.viewerVideo.clear_widgets)
@@ -222,6 +265,20 @@ class HomePage(BoxLayout):
             self.def_directory = self.show_popup.path_Text.text
             self.dir_label.text = self.def_directory
         self.directory_window.dismiss()
+
+    def disable_Fn(self):
+        self.v_download.disabled = True
+        self.quality_max.disabled = True
+        self.quality_min.disabled = True
+        self.audio_checker.disabled = True
+        self.stop_btn.disabled = False
+
+    def enable_Fn(self):
+        self.v_download.disabled = False
+        self.quality_max.disabled = False
+        self.quality_min.disabled = False
+        self.audio_checker.disabled = False
+        self.stop_btn.disabled = True
 
     # # ---- Functions ---- # #
 
@@ -311,3 +368,6 @@ class YoutubeDownloader(App):
 
 if __name__ == "__main__":
     YoutubeDownloader().run()
+
+
+
