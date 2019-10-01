@@ -25,6 +25,7 @@ from ydl_Downloader import Down
 from functools import partial
 from multiprocessing import Process
 import threading
+import sys
 
 Window.borderless = 0
 Window.clearcolor = (0.17, 0.17, 0.17, 1)
@@ -340,7 +341,8 @@ class PopU(BoxLayout):
                 self.path_Text.text = self.path+"\\"
                 print(self.path)
         except Exception as e:
-            print(f"Selecting Directory, Error: {e} ")
+            print(f"Selecting Directory, Error: {e}.\nLine: {sys.exc_info()[-1].tb_lineno}\n"
+                  f"Type Error: {type(e).__name__}")
 
     def change_main_direct(self, path, *instance):
         print(path)
@@ -348,7 +350,8 @@ class PopU(BoxLayout):
             self.file_chooser_list.path = path
             self.path_Text.text = path
         except Exception as e:
-            print(f"Changing Path: error:{e}")
+            print(f"Changing Path: error: {e}.\nLine: {sys.exc_info()[-1].tb_lineno}\n"
+                  f"Type Error: {type(e).__name__}")
 
 
 class YoutubeDownloader(App):

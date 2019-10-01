@@ -10,6 +10,7 @@ from kivy.uix.button import Button
 from kivy.uix.image import Image, AsyncImage
 from Str_Converter import convert_vtt_to_srt
 from functools import partial
+import sys
 
 
 class Down:
@@ -47,7 +48,7 @@ class Down:
                 print(d['status'])
                 #self.percentage_label.text = f"100 %"
         except Exception as e:
-            print(f"Can't Hook : {e}")
+            print(f"\nCan't Hook{{{e}}}Line: {sys.exc_info()[-1].tb_lineno}")
 
     def audio_download(self, audio_opts="", link="", counter=0, just_mp3=False):
         print("audio")
@@ -80,7 +81,8 @@ class Down:
             if just_mp3:
                 self.video_btn_label.color = (0.13, 0.83, 0.25, 1)
         except Exception as e:
-            print(f"Can't download Audio: {e}")
+            print(f"Can't download Audio: {e}.\nLine: {sys.exc_info()[-1].tb_lineno}\n"
+                  f"Type Error: {type(e).__name__}")
             self.video_btn_label.color = (1, 0, 0, 1)
 
     def video_download(self, video_opts="", audio_opts="", video="", counter=0):
@@ -114,7 +116,8 @@ class Down:
             #convert_vtt_to_srt(sub_vtt)
             self.video_btn_label.color = (0.13, 0.83, 0.25, 1)
         except Exception as e:
-            print(f"Can't download Video/Audio: {e}")
+            print(f"Can't download Video/Audio: {e}.\nLine: {sys.exc_info()[-1].tb_lineno}\n"
+                  f"Type Error: {type(e).__name__}")
             self.video_btn_label.color = (1, 0, 0, 1)
         finally:
             if os.path.exists(video_opts['outtmpl']):
@@ -174,7 +177,8 @@ class Down:
                             print(e)
                         counter += 1
         except Exception as e:
-            print(f"Can't Download: {e}")
+            print(f"Can't Download: {e}.\nLine: {sys.exc_info()[-1].tb_lineno}\n"
+                  f"Type Error: {type(e).__name__}")
 
     def making_viewer_ui(self, counter, y_title, folder_path, img_url, file_size_v, file_size_a):
         try:
@@ -232,7 +236,8 @@ class Down:
             self.percentage_label.bind(size=self.percentage_label.setter('text_size'))
             self.viewerVideo.add_widget(self.percentage_label)
         except Exception as e:
-            print(f"Viweing Error: {e}")
+            print(f"Viweing Error: {e}.\nLine: {sys.exc_info()[-1].tb_lineno}\n"
+                  f"Type Error: {type(e).__name__}")
         # ---------------------------------------------------
 
     def open_video(self, path, *instance):
