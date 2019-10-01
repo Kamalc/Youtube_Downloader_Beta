@@ -15,6 +15,7 @@ from kivy.uix.dropdown import DropDown
 from kivy.uix.scrollview import ScrollView
 from kivy.uix.checkbox import CheckBox
 from kivy.uix.popup import Popup
+from kivy.graphics import Rectangle, Color
 from kivy.uix.image import AsyncImage
 from kivy.uix.filechooser import FileChooser, FileChooserListView, FileChooserIconView
 from kivy.uix.checkbox import CheckBox
@@ -31,6 +32,7 @@ Window.size = (850, 400)
 Config.set('input', 'mouse', 'mouse,multitouch_on_demand')
 # --------------------------------------------------------
 import ctypes
+
 
 def terminate_thread(thread):
     """Terminates a python thread from another thread.
@@ -65,6 +67,7 @@ class BaseThread(threading.Thread):
         if self.callback is not None:
             self.callback(*self.callback_args)
 # --------------------------------------------------------
+#os.startfile('Season 2019 _ Login Screen - League of Legends-ACRAptyOwls.webm')
 
 
 class HomePage(BoxLayout):
@@ -93,24 +96,21 @@ class HomePage(BoxLayout):
                                         size_hint_x=0.6, size_hint_y=.2, color=(0.18, 0.49, 0.60, 1)))
         self.upperLeftGrid = GridLayout(cols=1, rows=2, size_hint_x=0.2)
         self.speed_header_label = Label(text=f"Speed",
-                                              font_size=15, size_hint_y=0.5, color=(0.18, 0.49, 0.60, 1))
+                                        font_size=15, size_hint_y=0.5, color=(0.18, 0.49, 0.60, 1))
         self.speed_label = Label(text=f"0.0 KB/s",
-                                              font_size=20, size_hint_y=0.5, color=(0.22, 0.63, 0.78, 1))
+                                 font_size=20, size_hint_y=0.5, color=(0.22, 0.63, 0.78, 1))
         self.upperLeftGrid.add_widget(self.speed_header_label)
         self.upperLeftGrid.add_widget(self.speed_label)
         self.upperGrid.add_widget(self.upperLeftGrid)
         self.add_widget(self.upperGrid)
 
-        #self.text_dir = GridLayout(cols=2, rows=1, size_hint_y=0.18, padding=2, spacing=2)
         self.play_link = TextInput(multiline=False, size_hint=(1, 0.16))
         self.dir_label = Label(text=self.def_directory, size_hint=(1, 0.1), halign='left',
-                               color=(0.18, 0.49, 0.60, 1))
+                               color=(0.22, 0.63, 0.78, 1))
         self.dir_label.bind(size=self.dir_label.setter('text_size'))
-        #self.text_dir.add_widget(self.play_link)
-        #self.text_dir.add_widget(self.dir_label)
+
         self.add_widget(self.play_link)
         self.add_widget(self.dir_label)
-
 
         self.midGrid = GridLayout(cols=6)
         self.add_widget(self.midGrid)
@@ -232,6 +232,8 @@ class HomePage(BoxLayout):
             self.quality_max.text = '1080p'
         if self.quality_min.text == 'Min Quality':
             self.quality_min.text = '144p'
+        if int(self.quality_min.text[:-1]) > int(self.quality_max.text[:-1]):
+            self.quality_max.text = self.quality_min.text
         if self.play_link.text:
             self.disable_Fn()
             self.download = BaseThread(target=self.download_target, callback=self.enable_Fn,
@@ -339,7 +341,6 @@ class PopU(BoxLayout):
                 print(self.path)
         except Exception as e:
             print(f"Selecting Directory, Error: {e} ")
-
 
     def change_main_direct(self, path, *instance):
         print(path)

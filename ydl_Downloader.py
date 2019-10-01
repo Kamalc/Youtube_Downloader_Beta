@@ -6,8 +6,10 @@ from MergeVA import MergeVA
 import re
 from pytube.compat import unicode
 from kivy.uix.label import Label
+from kivy.uix.button import Button
 from kivy.uix.image import Image, AsyncImage
 from Str_Converter import convert_vtt_to_srt
+from functools import partial
 
 
 class Down:
@@ -31,7 +33,7 @@ class Down:
                                       size_hint_y=None,
                                       height=60, halign="right", valign="middle",
                                       size_hint_x=0.06)
-        self.video_label = Label()
+        self.video_btn_label = Button()
 
     @staticmethod
     def my_hook(d):
@@ -66,7 +68,7 @@ class Down:
 
         try:
             if just_mp3:
-                self.making_viewer_ui(counter, audio_title, self.folder_path, f"{audio_meta['thumbnail']}",
+                self.making_viewer_ui(counter, audio_title, f"{self.folder_path}/{audio_name}.mp3", f"{audio_meta['thumbnail']}",
                                       audio_meta['filesize'], audio_meta['filesize'])
                 self.Quality_label.text = "MP3"
                 if os.path.exists(audio_opts['outtmpl']):
@@ -76,10 +78,10 @@ class Down:
                 ydl.extract_info(link, download=True)
 
             if just_mp3:
-                self.video_label.color = (0.13, 0.83, 0.25, 1)
+                self.video_btn_label.color = (0.13, 0.83, 0.25, 1)
         except Exception as e:
             print(f"Can't download Audio: {e}")
-            self.video_label.color = (1, 0, 0, 1)
+            self.video_btn_label.color = (1, 0, 0, 1)
 
     def video_download(self, video_opts="", audio_opts="", video="", counter=0):
         with youtube_dl.YoutubeDL(video_opts) as ydl:
@@ -99,7 +101,7 @@ class Down:
         sub_vtt = f"{self.folder_path}/{video_name}_v.en.vtt"
         print(video)
         try:
-            self.making_viewer_ui(counter, video_title, self.folder_path, f"{video_meta['thumbnail']}",
+            self.making_viewer_ui(counter, video_title, f"{self.folder_path}/{video_name}.mkv", f"{video_meta['thumbnail']}",
                                   video_meta['filesize'], audio_meta['filesize'])
             with youtube_dl.YoutubeDL(video_opts) as ydl:
                 self.Quality_label.text = f"{video_meta['height']}P"
@@ -112,10 +114,10 @@ class Down:
                                audio_opts['outtmpl'],
                                f"{self.folder_path}/{video_name}.mkv")
             convert_vtt_to_srt(sub_vtt)
-            self.video_label.color = (0.13, 0.83, 0.25, 1)
+            self.video_btn_label.color = (0.13, 0.83, 0.25, 1)
         except Exception as e:
             print(f"Can't download Video/Audio: {e}")
-            self.video_label.color = (1, 0, 0, 1)
+            self.video_btn_label.color = (1, 0, 0, 1)
         finally:
             if os.path.exists(video_opts['outtmpl']):
                 os.remove(video_opts['outtmpl'])
@@ -144,7 +146,7 @@ class Down:
                 meta = ydl.extract_info(youtube_link, download=False)
             print(meta['extractor']+'********************************************')
             if meta['extractor'] == 'youtube':# if u put link video at playlist will download play list not one video
-                if audio_checker:
+                if audio_checker.active:
                     self.audio_download(audio_opts=audio_opts, link=youtube_link, just_mp3=True)
                 else:
                     self.video_download(video_opts=video_opts, audio_opts=audio_opts, video=youtube_link)
@@ -174,58 +176,67 @@ class Down:
                     counter += 1
 
     def making_viewer_ui(self, counter, y_title, folder_path, img_url, file_size_v, file_size_a):
-        print(file_size_a, file_size_v)
-        if file_size_v is None or file_size_a is None:
-            file_size = 0
-        else:
-            file_size = file_size_v+file_size_a
-        file_size = round(file_size/1024/1024, 2)
+        try:
+            print("FileSize Audio & Video", file_size_a, file_size_v)
+            if file_size_v is None or file_size_a is None:
+                file_size = 0
+            else:
+                file_size = file_size_v+file_size_a
+            file_size = round(file_size/1024/1024, 2)
 
-        icon = AsyncImage(source=img_url, allow_stretch=True, size_hint_x=0.1,
-                          size_hint_y=None, height=60)
-        self.viewerVideo.add_widget(icon)
-        title = f' {y_title}   '
-        if counter:
-            title = f"{counter}. {title}"
-        self.video_label = Label(text=title, color=(0.18, 0.49, 0.60, 1),
-                                 size_hint_y=None, height=60, halign="left", valign="middle",
-                                 size_hint_x=0.4, font_name='Arial')
-        self.video_label.bind(size=self.video_label.setter('text_size'))
-        self.viewerVideo.height += self.video_label.height * 2
-        self.viewerVideo.add_widget(self.video_label)
+            icon = AsyncImage(source=img_url, allow_stretch=True, size_hint_x=0.1,
+                              size_hint_y=None, height=60)
+            self.viewerVideo.add_widget(icon)
+            title = f' {y_title}   '
+            if counter:
+                title = f"{counter}. {title}"
 
-        self.Quality_label = Label(text="", color=(0.18, 0.49, 0.60, 1),
-                                   size_hint_y=None,
-                                   height=60, halign="center", valign="middle",
-                                   size_hint_x=0.06)
-        self.Quality_label.bind(size=self.Quality_label.setter('text_size'))
-        self.viewerVideo.add_widget(self.Quality_label)
+            self.video_btn_label = Button(text=y_title, color=(0.18, 0.49, 0.60, 1),
+                                          size_hint_y=None, height=60, halign="left", valign="middle",
+                                          size_hint_x=0.4, font_name='Arial', background_color=(0.17, 0.17, 0.17, 1),
+                                          background_normal='')
+            self.video_btn_label.bind(size=self.video_btn_label.setter('text_size'))
+            self.viewerVideo.height += self.video_btn_label.height * 2
+            self.viewerVideo.add_widget(self.video_btn_label)
+            self.video_btn_label.bind(on_release=partial(self.open_video, folder_path))
+            # background_disabled_normal
+            self.Quality_label = Label(text="", color=(0.18, 0.49, 0.60, 1),
+                                       size_hint_y=None,
+                                       height=60, halign="center", valign="middle",
+                                       size_hint_x=0.06)
+            self.Quality_label.bind(size=self.Quality_label.setter('text_size'))
+            self.viewerVideo.add_widget(self.Quality_label)
 
-        self.video_folder = Label(text="", color=(0.18, 0.49, 0.60, 1),
-                                  size_hint_y=None,
-                                  height=60, halign="left", valign="middle",
-                                  size_hint_x=0.1)
-        self.video_folder.bind(size=self.video_folder.setter('text_size'))
-        self.viewerVideo.add_widget(self.video_folder)
-
-        if file_size is 0:
-            file_size = "Unknown Size"
-        self.Size_label = Label(text=str(file_size)+"MB", color=(0.18, 0.49, 0.60, 1),
-                                size_hint_y=None,
-                                height=60, halign="center", valign="middle",
-                                size_hint_x=0.1)
-        self.Size_label.bind(size=self.Size_label.setter('text_size'))
-        self.viewerVideo.add_widget(self.Size_label)
-
-        perc = f"0 %"
-        self.percentage_label = Label(text=perc, color=(0.18, 0.49, 0.60, 1),
+            self.video_folder = Label(text="", color=(0.18, 0.49, 0.60, 1),
                                       size_hint_y=None,
-                                      height=60, halign="right", valign="middle",
+                                      height=60, halign="left", valign="middle",
                                       size_hint_x=0.1)
-        self.percentage_label.bind(size=self.percentage_label.setter('text_size'))
-        self.viewerVideo.add_widget(self.percentage_label)
+            self.video_folder.bind(size=self.video_folder.setter('text_size'))
+            self.viewerVideo.add_widget(self.video_folder)
 
+            if file_size == '0':
+                file_size = "Unknown Size"
+            self.Size_label = Label(text=str(file_size)+"MB", color=(0.18, 0.49, 0.60, 1),
+                                    size_hint_y=None,
+                                    height=60, halign="center", valign="middle",
+                                    size_hint_x=0.1)
+            self.Size_label.bind(size=self.Size_label.setter('text_size'))
+            self.viewerVideo.add_widget(self.Size_label)
+
+            perc = f"0 %"
+            self.percentage_label = Label(text=perc, color=(0.18, 0.49, 0.60, 1),
+                                          size_hint_y=None,
+                                          height=60, halign="right", valign="middle",
+                                          size_hint_x=0.1)
+            self.percentage_label.bind(size=self.percentage_label.setter('text_size'))
+            self.viewerVideo.add_widget(self.percentage_label)
+        except Exception as e:
+            print(f"Viweing Error: {e}")
         # ---------------------------------------------------
+    def open_video(self, path, *instance):
+        print(f"opening video: {path}")
+        if os.path.exists(path):
+            os.startfile(path)
 
     @staticmethod
     def filename(s="", max_length=255):
