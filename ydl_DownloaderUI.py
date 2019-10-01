@@ -68,7 +68,6 @@ class BaseThread(threading.Thread):
         if self.callback is not None:
             self.callback(*self.callback_args)
 # --------------------------------------------------------
-#os.startfile('Season 2019 _ Login Screen - League of Legends-ACRAptyOwls.webm')
 
 
 class HomePage(BoxLayout):
@@ -79,7 +78,8 @@ class HomePage(BoxLayout):
         self.playlist = False
         self.playlist_url_dp = ""
         self.directory_window = Popup()
-        self.show_popup = PopU()
+        self.show_popup_directory = PopDirectory()
+        self.show_popup_options = PopOptions()
         self.def_directory = 'D:/download/'
         # ........................................................................
     # UI Design
@@ -91,6 +91,7 @@ class HomePage(BoxLayout):
         self.upperGrid.size_hint_y = 0.30
 
         self.options_btn = Button(text="Options", size_hint_x=0.2, color=(0.22, 0.63, 0.78, 1))
+        self.options_btn.bind(on_release=self.open_options)
         self.upperGrid.add_widget(self.options_btn)
         self.upperGrid.add_widget(Label(text="Youtube Downloader",
                                         font_size=35,
@@ -106,6 +107,7 @@ class HomePage(BoxLayout):
         self.add_widget(self.upperGrid)
 
         self.play_link = TextInput(multiline=False, size_hint=(1, 0.16))
+        self.play_link.hint_text = "Put Url Video or Playlist Here"
         self.dir_label = Label(text=self.def_directory, size_hint=(1, 0.1), halign='left',
                                color=(0.22, 0.63, 0.78, 1))
         self.dir_label.bind(size=self.dir_label.setter('text_size'))
@@ -193,14 +195,18 @@ class HomePage(BoxLayout):
         self.lower_grid.add_widget(self.stop_btn)
 
         self.add_widget(self.lower_grid)
-        # --- Pop Up Screen -------------------------------------------
-        self.directory_window = Popup(title="Directory", content=self.show_popup, size_hint=(None, None),
+        # --- Pop Up Screens -------------------------------------------
+        self.directory_window = Popup(title="Directory", content=self.show_popup_directory, size_hint=(None, None),
                                       size=(500, 400), title_color=(0.18, 0.49, 0.60, 1))
-        self.show_popup.cancel_btn.bind(on_release=self.directory_window.dismiss)
-        self.show_popup.select_btn.bind(on_release=self.choose_folder)
-        self.show_popup.path_Text.text = self.def_directory
-        self.show_popup.file_chooser_list.path = self.def_directory
-        self.kill_download = False
+        self.show_popup_directory.cancel_btn.bind(on_release=self.directory_window.dismiss)
+        self.show_popup_directory.select_btn.bind(on_release=self.choose_folder)
+        self.show_popup_directory.path_Text.text = self.def_directory
+        self.show_popup_directory.file_chooser_list.path = self.def_directory
+
+        self.options_window = Popup(title="Options", content=self.show_popup_options, size_hint=(None, None),
+                                    size=(500, 400), title_color=(0.18, 0.49, 0.60, 1))
+        #self.options_window.cancel_btn.bind(on_release=self.directory_window.dismiss)
+        #self.options_window.select_btn.bind(on_release=self.choose_folder)
         # -------------------------------------------------------------
         self.downloader = Down(self.speed_label, self.viewerVideo)
         self.download = BaseThread
@@ -218,15 +224,11 @@ class HomePage(BoxLayout):
             #self.stop_btn.text = "Resume Download"
         self.paused = True
         terminate_thread(self.download)
-        self.enable_Fn()
+        self.enable_fn()
         #else:
             #self.stop_btn.text = "Pause Download"
             #self.paused = False
             #self.start_download
-
-    def choose_directory(self, instance):
-        self.show_popup.path_Text.text = self.def_directory
-        self.directory_window.open()
 
     def start_download(self, instance):
         if self.quality_max.text == 'Max Quality':
@@ -236,8 +238,8 @@ class HomePage(BoxLayout):
         if int(self.quality_min.text[:-1]) > int(self.quality_max.text[:-1]):
             self.quality_max.text = self.quality_min.text
         if self.play_link.text:
-            self.disable_Fn()
-            self.download = BaseThread(target=self.download_target, callback=self.enable_Fn,
+            self.disable_fn()
+            self.download = BaseThread(target=self.download_target, callback=self.enable_fn,
                                        callback_args=())
             print("Downloading")
             self.download.daemon = True
@@ -252,7 +254,6 @@ class HomePage(BoxLayout):
 
     def clear_viewer(self, instance):
         clear_viewer = Thread(target=self.viewerVideo.clear_widgets)
-        #clear_viewer = Thread(target=self.clearing)
         clear_viewer.daemon = True
         clear_viewer.start()
 
@@ -261,37 +262,47 @@ class HomePage(BoxLayout):
         self.viewerVideo.clear_widgets(self.viewerVideo.children[0:4])
         #self.viewerVideo.remove_widget(self.viewerVideo.children[:4])
 
-    def choose_folder(self, instance):
-        print(self.show_popup.path_Text.text)
-        if self.show_popup.path_Text.text:
-            self.path_folder(self.show_popup.path_Text.text)
-            self.def_directory = self.show_popup.path_Text.text
-            self.dir_label.text = self.def_directory
-        self.directory_window.dismiss()
-
-    def disable_Fn(self):
+    def disable_fn(self):
         self.v_download.disabled = True
         self.quality_max.disabled = True
         self.quality_min.disabled = True
         self.audio_checker.disabled = True
         self.stop_btn.disabled = False
 
-    def enable_Fn(self):
+    def enable_fn(self):
         self.v_download.disabled = False
         self.quality_max.disabled = False
         self.quality_min.disabled = False
         self.audio_checker.disabled = False
         self.stop_btn.disabled = True
 
-    # # ---- Functions ---- # #
+    # ---- Browse Button --------------------
+    def choose_directory(self, instance):
+        self.show_popup_directory.path_Text.text = self.def_directory
+        self.directory_window.open()
+    # # ---- Functions (PopUp Directory) ---- # #
 
     def path_folder(self, path='D:/download'):
-        self.def_directory = path  # +"/"
+        self.def_directory = path
         print(self.def_directory)
         return self.def_directory
 
+    def choose_folder(self, instance):
+        print(self.show_popup_directory.path_Text.text)
+        if self.show_popup_directory.path_Text.text:
+            self.path_folder(self.show_popup_directory.path_Text.text)
+            self.def_directory = self.show_popup_directory.path_Text.text
+            self.dir_label.text = self.def_directory
+        self.directory_window.dismiss()
+    # ------------------------------------------
 
-class PopU(BoxLayout):
+    # ---- Browse Button --------------------
+    def open_options(self, instance):
+        self.options_window.open()
+    # # ---- Functions (PopUp Options) ---- # #
+
+
+class PopDirectory(BoxLayout):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
@@ -354,10 +365,58 @@ class PopU(BoxLayout):
                   f"Type Error: {type(e).__name__}")
 
 
+class PopOptions(BoxLayout):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+        self.orientation = 'vertical'
+
+        self.upper_grid = GridLayout(size_hint=(1, 0.1))
+        self.add_widget(self.upper_grid)
+
+        self.mid_grid = GridLayout(cols=2, rows=8, size_hint_y=0.8, spacing=2, padding=2)
+        self.mid_grid.add_widget(Label(text="Default Directory ", size_hint=(0.4, 0.1)))
+        self.def_dir_text = TextInput(multiline=False, size_hint=(0.4, 0.1), font_size=15)
+        self.def_dir_text.hint_text = r"ex:  D://Download/"
+        self.mid_grid.add_widget(self.def_dir_text)
+        self.mid_grid.add_widget(Label(text="Subtitles If found ", size_hint=(0.4, 0.1)))
+        self.def_dir_text = TextInput(multiline=False, size_hint=(0.4, 0.1), font_size=15)
+        self.def_dir_text.hint_text = r"ex:  ssssss"
+        self.mid_grid.add_widget(self.def_dir_text)
+        self.mid_grid.add_widget(Label(text="Subtitles Languages ", size_hint=(0.4, 0.1)))
+        self.def_dir_text = TextInput(multiline=False, size_hint=(0.4, 0.1), font_size=15)
+        self.def_dir_text.hint_text = "ex:  en, ar, es, ..., etc"
+        self.mid_grid.add_widget(self.def_dir_text)
+        self.mid_grid.add_widget(Label(text="EEXEE UN ", size_hint=(0.4, 0.1)))
+        self.def_dir_text = TextInput(multiline=False, size_hint=(0.4, 0.1), font_size=15)
+        self.def_dir_text.hint_text = r"ex:  ssssss"
+        self.mid_grid.add_widget(self.def_dir_text)
+        self.mid_grid.add_widget(Label(text="EEXEE UN ", size_hint=(0.4, 0.1)))
+        self.def_dir_text = TextInput(multiline=False, size_hint=(0.4, 0.1), font_size=15)
+        self.def_dir_text.hint_text = r"ex:  ssssss"
+        self.mid_grid.add_widget(self.def_dir_text)
+        self.mid_grid.add_widget(Label(text="EEXEE UN ", size_hint=(0.4, 0.1)))
+        self.def_dir_text = TextInput(multiline=False, size_hint=(0.4, 0.1), font_size=15)
+        self.def_dir_text.hint_text = r"ex:  ssssss"
+        self.mid_grid.add_widget(self.def_dir_text)
+        self.mid_grid.add_widget(Label(text="EEXEE UN ", size_hint=(0.4, 0.1)))
+        self.def_dir_text = TextInput(multiline=False, size_hint=(0.4, 0.1), font_size=15)
+        self.def_dir_text.hint_text = r"ex:  ssssss"
+        self.mid_grid.add_widget(self.def_dir_text)
+        self.add_widget(self.mid_grid)
+
+        self.lower_grid = GridLayout(cols=2, rows=1, size_hint_y=0.1, spacing=5, padding=2)
+        self.save_btn = Button(text="Save", size_hint=(0.4, 0.1), color=(0.22, 0.63, 0.78, 1))
+        self.cancel_btn = Button(text="Cancel", size_hint=(0.4, 0.1), color=(0.22, 0.63, 0.78, 1))
+        self.lower_grid.add_widget(self.save_btn)
+        self.lower_grid.add_widget(self.cancel_btn)
+
+        self.add_widget(self.lower_grid)
+
+
 class YoutubeDownloader(App):
     def build(self):
         self.screen_manager = ScreenManager()
-
         self.home_page = HomePage()
         screen = Screen(name="Home")
         screen.add_widget(self.home_page)
