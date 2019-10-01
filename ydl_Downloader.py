@@ -46,8 +46,8 @@ class Down:
             else:
                 print(d['status'])
                 #self.percentage_label.text = f"100 %"
-        except:
-            print("\n")
+        except Exception as e:
+            print(f"Can't Hook : {e}")
 
     def audio_download(self, audio_opts="", link="", counter=0, just_mp3=False):
         print("audio")
@@ -86,10 +86,8 @@ class Down:
     def video_download(self, video_opts="", audio_opts="", video="", counter=0):
         with youtube_dl.YoutubeDL(video_opts) as ydl:
             video_meta = ydl.extract_info(video, download=False)
-            #print(video_meta['filesize'])
         with youtube_dl.YoutubeDL(audio_opts) as ydl:
             audio_meta = ydl.extract_info(video, download=False)
-            #print(audio_meta['filesize'])
         video_title = self.filename(video_meta['title'])
         if counter:
             video_name = f"{self.get_cnt(counter)}{video_title}"
@@ -113,7 +111,7 @@ class Down:
             MergeVA().merge_va(video_opts['outtmpl'],
                                audio_opts['outtmpl'],
                                f"{self.folder_path}/{video_name}.mkv")
-            convert_vtt_to_srt(sub_vtt)
+            #convert_vtt_to_srt(sub_vtt)
             self.video_btn_label.color = (0.13, 0.83, 0.25, 1)
         except Exception as e:
             print(f"Can't download Video/Audio: {e}")
@@ -125,55 +123,58 @@ class Down:
                 os.remove(audio_opts['outtmpl'])
 
     def download(self, youtube_link, folder_path, quality_max, quality_min, audio_checker):
-        self.folder_path = folder_path
-        if youtube_link:
-            opts = {}
-            video_opts = {'format': '', 'outtmpl': '', 'progress_hooks': [self.my_hook],
-                          #'writesubtitles': True, 'allsubtitles': False, 'subtitleslangs': ['en']
-                          }
-                          # IF auto make writesubtitles to False , 'writeautomaticsub': True}
-            audio_opts = {'format': '250/249/251', 'outtmpl': '', 'progress_hooks': [self.my_hook]}
+        try:
+            self.folder_path = folder_path
+            if youtube_link:
+                opts = {}
+                video_opts = {'format': '', 'outtmpl': '', 'progress_hooks': [self.my_hook],
+                              #'writesubtitles': True, 'allsubtitles': False, 'subtitleslangs': ['en']
+                              }
+                              # IF auto make writesubtitles to False , 'writeautomaticsub': True}
+                audio_opts = {'format': '250/249/251', 'outtmpl': '', 'progress_hooks': [self.my_hook]}
 
-            quality_max = int(quality_max[0:-1])
-            quality_min = int(quality_min[0:-1])
+                quality_max = int(quality_max[0:-1])
+                quality_min = int(quality_min[0:-1])
 
-            for k, v in self.quality_ids.items():
-                if int(quality_min) <= int(k) <= int(quality_max):
-                    for vs in v:
-                        video_opts['format'] += f"{vs}/"
+                for k, v in self.quality_ids.items():
+                    if int(quality_min) <= int(k) <= int(quality_max):
+                        for vs in v:
+                            video_opts['format'] += f"{vs}/"
 
-            with youtube_dl.YoutubeDL(opts) as ydl:
-                meta = ydl.extract_info(youtube_link, download=False)
-            print(meta['extractor']+'********************************************')
-            if meta['extractor'] == 'youtube':# if u put link video at playlist will download play list not one video
-                if audio_checker.active:
-                    self.audio_download(audio_opts=audio_opts, link=youtube_link, just_mp3=True)
+                with youtube_dl.YoutubeDL(opts) as ydl:
+                    meta = ydl.extract_info(youtube_link, download=False)
+                print(meta['extractor']+'********************************************')
+                if meta['extractor'] == 'youtube':# if u put link video at playlist will download play list not one video
+                    if audio_checker.active:
+                        self.audio_download(audio_opts=audio_opts, link=youtube_link, just_mp3=True)
+                    else:
+                        self.video_download(video_opts=video_opts, audio_opts=audio_opts, video=youtube_link)
                 else:
-                    self.video_download(video_opts=video_opts, audio_opts=audio_opts, video=youtube_link)
-            else:
-                counter = 1
-                video_list = []
-                video = meta['entries']
-                folder_name = self.filename(meta['title'])
+                    counter = 1
+                    video_list = []
+                    video = meta['entries']
+                    folder_name = self.filename(meta['title'])
 
-                self.folder_path += folder_name
-                self.create_new_folder(self.folder_path)
-                for k in video:
-                    video_list.append(k['webpage_url'])
+                    self.folder_path += folder_name
+                    self.create_new_folder(self.folder_path)
+                    for k in video:
+                        video_list.append(k['webpage_url'])
 
-                self.playlistLen = len(video_list)
-                for video in video_list:
-                    try:
-                        if audio_checker.active:
-                            self.audio_download(audio_opts=audio_opts, link=video,
-                                                counter=counter, just_mp3=True)
-                        else:
-                            self.video_download(video_opts=video_opts, audio_opts=audio_opts, video=video,
-                                                counter=counter)
+                    self.playlistLen = len(video_list)
+                    for video in video_list:
+                        try:
+                            if audio_checker.active:
+                                self.audio_download(audio_opts=audio_opts, link=video,
+                                                    counter=counter, just_mp3=True)
+                            else:
+                                self.video_download(video_opts=video_opts, audio_opts=audio_opts, video=video,
+                                                    counter=counter)
 
-                    except Exception as e:
-                        print(e)
-                    counter += 1
+                        except Exception as e:
+                            print(e)
+                        counter += 1
+        except Exception as e:
+            print(f"Can't Download: {e}")
 
     def making_viewer_ui(self, counter, y_title, folder_path, img_url, file_size_v, file_size_a):
         try:
@@ -233,6 +234,7 @@ class Down:
         except Exception as e:
             print(f"Viweing Error: {e}")
         # ---------------------------------------------------
+
     def open_video(self, path, *instance):
         print(f"opening video: {path}")
         if os.path.exists(path):
