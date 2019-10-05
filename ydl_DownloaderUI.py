@@ -1,6 +1,4 @@
 import os
-import math
-import re
 from threading import Thread
 from kivy.config import Config
 Config.set('graphics', 'resizable', False)
@@ -18,55 +16,19 @@ from kivy.uix.popup import Popup
 from kivy.graphics import Rectangle, Color
 from kivy.uix.image import AsyncImage
 from kivy.uix.filechooser import FileChooser, FileChooserListView, FileChooserIconView
+from HoverButton import HoverButton
 from kivy.uix.checkbox import CheckBox
 from kivy.uix.screenmanager import Screen, ScreenManager
 from kivy.core.window import Window
 from ydl_Downloader import Down
 from functools import partial
-from multiprocessing import Process
-import threading
+from MyThread import BaseThread, terminate_thread
 import sys
 
 Window.borderless = 0
 Window.clearcolor = (0.17, 0.17, 0.17, 1)
 Window.size = (850, 400)
 Config.set('input', 'mouse', 'mouse,multitouch_on_demand')
-# --------------------------------------------------------
-import ctypes
-
-
-def terminate_thread(thread):
-    """Terminates a python thread from another thread.
-
-    :param thread: a threading.Thread instance
-    """
-    if not thread.isAlive():
-        return
-
-    exc = ctypes.py_object(SystemExit)
-    res = ctypes.pythonapi.PyThreadState_SetAsyncExc(
-        ctypes.c_long(thread.ident), exc)
-    if res == 0:
-        raise ValueError("nonexistent thread id")
-    elif res > 1:
-        # """if it returns a number greater than one, you're in trouble,
-        # and you should call it again with exc=NULL to revert the effect"""
-        ctypes.pythonapi.PyThreadState_SetAsyncExc(thread.ident, None)
-        raise SystemError("PyThreadState_SetAsyncExc failed")
-
-
-class BaseThread(threading.Thread):
-    def __init__(self, callback=None, callback_args=None, *args, **kwargs):
-        target = kwargs.pop('target')
-        super(BaseThread, self).__init__(target=self.target_with_callback, *args, **kwargs)
-        self.callback = callback
-        self.method = target
-        self.callback_args = callback_args
-
-    def target_with_callback(self):
-        self.method()
-        if self.callback is not None:
-            self.callback(*self.callback_args)
 # --------------------------------------------------------
 
 
@@ -91,6 +53,7 @@ class HomePage(BoxLayout):
         self.upperGrid.size_hint_y = 0.30
 
         self.options_btn = Button(text="Options", size_hint_x=0.2, color=(0.22, 0.63, 0.78, 1))
+        self.options_btn.disabled = True
         self.options_btn.bind(on_release=self.open_options)
         self.upperGrid.add_widget(self.options_btn)
         self.upperGrid.add_widget(Label(text="Youtube Downloader",
@@ -127,20 +90,24 @@ class HomePage(BoxLayout):
         self.max_qualities = ['2160p', '1440p', '1080p', '720p', '480p', '360p', '240p', '144p']
         self.min_qualities = self.max_qualities[::-1]
 
-        self.quality_max = Button(text='Max Quality', size_hint=(None, None), height='48dp', color=(0.22, 0.63, 0.78, 1))
+        self.quality_max = HoverButton(text='Max Quality', size_hint=(None, None), height='48dp',
+                                       color=(0.22, 0.63, 0.78, 1), background_color=(0.35, 0.35, 0.35, 1))
         self.quality_max.bind(on_release=self.q_drop_down_max.open)
         self.q_drop_down_max.bind(on_select=lambda instance, q: setattr(self.quality_max, 'text', q))
         for quality in self.max_qualities:
-            btn1 = Button(text=quality, size_hint_y=None, height=48, color=(0.22, 0.63, 0.78, 1))
+            btn1 = HoverButton(text=quality, size_hint_y=None, height=48, color=(0.22, 0.63, 0.78, 1)
+                               , background_color=(0.35, 0.35, 0.35, 1))
             btn1.bind(on_release=lambda btn1: self.q_drop_down_max.select(btn1.text))
             self.q_drop_down_max.add_widget(btn1)
         self.midGrid.add_widget(self.quality_max)
 
-        self.quality_min = Button(text='Min Quality', size_hint=(None, None), height='48dp', color=(0.22, 0.63, 0.78, 1))
+        self.quality_min = HoverButton(text='Min Quality', size_hint=(None, None), height='48dp',
+                                       color=(0.22, 0.63, 0.78, 1), background_color=(0.35, 0.35, 0.35, 1))
         self.quality_min.bind(on_release=self.q_drop_down_min.open)
         self.q_drop_down_min.bind(on_select=lambda instance, q: setattr(self.quality_min, 'text', q))
         for quality in self.min_qualities:
-            btn2 = Button(text=quality, size_hint_y=None, height=48, color=(0.22, 0.63, 0.78, 1))
+            btn2 = HoverButton(text=quality, size_hint_y=None, height=48, color=(0.22, 0.63, 0.78, 1)
+                               , background_color=(0.35, 0.35, 0.35, 1))
             btn2.bind(on_release=lambda btn2: self.q_drop_down_min.select(btn2.text))
             self.q_drop_down_min.add_widget(btn2)
         self.midGrid.add_widget(self.quality_min)
@@ -151,13 +118,14 @@ class HomePage(BoxLayout):
         self.grid_audio_checker.add_widget(self.audio_checker)
         self.midGrid.add_widget(self.grid_audio_checker)
 
-        self.v_download = Button(text="Download", size_hint_x=0.6, color=(0.22, 0.63, 0.78, 1),
-                                 font_size=20)
+        self.v_download = HoverButton(text="Download", size_hint_x=0.6, color=(0.22, 0.63, 0.78, 1),
+                                      font_size=20, background_color=(0.35, 0.35, 0.35, 1))
 
         self.v_download.bind(on_press=self.start_download)
         self.midGrid.add_widget(self.v_download)
 
-        self.browse_btn = Button(text="Browse", size_hint_x=0.1, color=(0.22, 0.63, 0.78, 1))
+        self.browse_btn = HoverButton(text="Browse", size_hint_x=0.1, color=(0.22, 0.63, 0.78, 1)
+                                      , background_color=(0.35, 0.35, 0.35, 1))
         self.browse_btn.bind(on_release=self.choose_directory)
         self.midGrid.add_widget(self.browse_btn)
 
@@ -186,9 +154,11 @@ class HomePage(BoxLayout):
         self.add_widget(self.scroll)
 
         self.lower_grid = GridLayout(cols=2, size_hint_y=0.1)
-        self.clear_btn = Button(text="Clear", color=(0.22, 0.63, 0.78, 1))
+        self.clear_btn = HoverButton(text="Clear", color=(0.22, 0.63, 0.78, 1)
+                                     , background_color=(0.35, 0.35, 0.35, 1))
         self.clear_btn.bind(on_press=self.clear_viewer)
-        self.stop_btn = Button(text="Stop Download", color=(0.22, 0.63, 0.78, 1))
+        self.stop_btn = HoverButton(text="Stop Download", color=(0.22, 0.63, 0.78, 1)
+                                    , background_color=(0.35, 0.35, 0.35, 1))
         self.stop_btn.bind(on_release=self.stop_fn_btn)
         self.stop_btn.disabled = True
         self.lower_grid.add_widget(self.clear_btn)
@@ -231,12 +201,16 @@ class HomePage(BoxLayout):
             #self.start_download
 
     def start_download(self, instance):
-        if self.quality_max.text == 'Max Quality':
-            self.quality_max.text = '1080p'
-        if self.quality_min.text == 'Min Quality':
-            self.quality_min.text = '144p'
-        if int(self.quality_min.text[:-1]) > int(self.quality_max.text[:-1]):
-            self.quality_max.text = self.quality_min.text
+        if self.audio_checker.active:
+            self.quality_max.text = 'Max Quality'
+            self.quality_min.text = 'Min Quality'
+        else:
+            if self.quality_max.text == 'Max Quality':
+                self.quality_max.text = '1080p'
+            if self.quality_min.text == 'Min Quality':
+                self.quality_min.text = '144p'
+            if int(self.quality_min.text[:-1]) > int(self.quality_max.text[:-1]):
+                self.quality_max.text = self.quality_min.text
         if self.play_link.text:
             self.disable_fn()
             self.download = BaseThread(target=self.download_target, callback=self.enable_fn,
@@ -312,7 +286,8 @@ class PopDirectory(BoxLayout):
         print(self.partitions_caption)
         self.partitions_btn = GridLayout(cols=10, rows=1, size_hint_y=0.1, spacing=2)
         for partition in self.partitions_caption:
-            self.part_btn = Button(text=partition, id=partition+"\\", color=(0.22, 0.63, 0.78, 1))
+            self.part_btn = HoverButton(text=partition, id=partition+"\\", color=(0.22, 0.63, 0.78, 1)
+                                        , background_color=(0.35, 0.35, 0.35, 1))
             #self.part_btn.bind(on_release=lambda *args: self.change_main_direct(self.part_btn.id, *args))
             self.part_btn.bind(on_release=partial(self.change_main_direct, self.part_btn.id))
             #print(self.part_btn.id)
@@ -335,8 +310,10 @@ class PopDirectory(BoxLayout):
         self.add_widget(self.file_chooser_list)
 
         self.buttons_grid = GridLayout(cols=2, rows=2, size_hint_y=0.1, spacing=2)
-        self.select_btn = Button(text="Select", size_hint=(0.4, 0.1), color=(0.22, 0.63, 0.78, 1))
-        self.cancel_btn = Button(text="Cancel", size_hint=(0.4, 0.1), color=(0.22, 0.63, 0.78, 1))
+        self.select_btn = HoverButton(text="Select", size_hint=(0.4, 0.1), color=(0.22, 0.63, 0.78, 1)
+                                      , background_color=(0.35, 0.35, 0.35, 1))
+        self.cancel_btn = HoverButton(text="Cancel", size_hint=(0.4, 0.1), color=(0.22, 0.63, 0.78, 1)
+                                      , background_color=(0.35, 0.35, 0.35, 1))
 
         self.buttons_grid.add_widget(self.select_btn)
         self.buttons_grid.add_widget(self.cancel_btn)
@@ -406,8 +383,10 @@ class PopOptions(BoxLayout):
         self.add_widget(self.mid_grid)
 
         self.lower_grid = GridLayout(cols=2, rows=1, size_hint_y=0.1, spacing=5, padding=2)
-        self.save_btn = Button(text="Save", size_hint=(0.4, 0.1), color=(0.22, 0.63, 0.78, 1))
-        self.cancel_btn = Button(text="Cancel", size_hint=(0.4, 0.1), color=(0.22, 0.63, 0.78, 1))
+        self.save_btn = HoverButton(text="Save", size_hint=(0.4, 0.1), color=(0.22, 0.63, 0.78, 1)
+                                    , background_color=(0.35, 0.35, 0.35, 1))
+        self.cancel_btn = HoverButton(text="Cancel", size_hint=(0.4, 0.1), color=(0.22, 0.63, 0.78, 1)
+                                      , background_color=(0.35, 0.35, 0.35, 1))
         self.lower_grid.add_widget(self.save_btn)
         self.lower_grid.add_widget(self.cancel_btn)
 

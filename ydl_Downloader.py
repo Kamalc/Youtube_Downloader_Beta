@@ -1,3 +1,5 @@
+# -*- coding: UTF-8 -*-
+
 from __future__ import unicode_literals
 import youtube_dl
 import os
@@ -6,7 +8,7 @@ from MergeVA import MergeVA
 import re
 from pytube.compat import unicode
 from kivy.uix.label import Label
-from kivy.uix.button import Button
+from HoverButton import HoverButton
 from kivy.uix.image import Image, AsyncImage
 from Str_Converter import convert_vtt_to_srt
 from functools import partial
@@ -14,7 +16,7 @@ import sys
 
 
 class Down:
-    def __init__(self, percentageDownload_label, viewerVideo):
+    def __init__(self, percentage_download_label, viewer_video):
         self.folder_path = ''
         self.playlistLen = 0
         self.quality_ids = {2160: [313],
@@ -25,8 +27,8 @@ class Down:
                             360: [243, 134],
                             240: [133, 242],
                             144: [160, 278]}
-        self.percentageDownload_label = percentageDownload_label
-        self.viewerVideo = viewerVideo
+        self.percentageDownload_label = percentage_download_label
+        self.viewerVideo = viewer_video
         self.Quality_label = Label(text="", color=(0.5, 0.5, 0.5, 1),
                                    size_hint_y=None, height=40,
                                    halign="right", valign="middle")
@@ -34,7 +36,7 @@ class Down:
                                       size_hint_y=None,
                                       height=60, halign="right", valign="middle",
                                       size_hint_x=0.06)
-        self.video_btn_label = Button()
+        self.video_btn_label = HoverButton()
 
     @staticmethod
     def my_hook(d):
@@ -136,13 +138,14 @@ class Down:
                               # IF auto make writesubtitles to False , 'writeautomaticsub': True}
                 audio_opts = {'format': '250/249/251', 'outtmpl': '', 'progress_hooks': [self.my_hook]}
 
-                quality_max = int(quality_max[0:-1])
-                quality_min = int(quality_min[0:-1])
+                if quality_max[-1] == 'p' and quality_min[-1] == 'p':
+                    quality_max = int(quality_max[0:-1])
+                    quality_min = int(quality_min[0:-1])
 
-                for k, v in self.quality_ids.items():
-                    if int(quality_min) <= int(k) <= int(quality_max):
-                        for vs in v:
-                            video_opts['format'] += f"{vs}/"
+                    for k, v in self.quality_ids.items():
+                        if int(quality_min) <= int(k) <= int(quality_max):
+                            for vs in v:
+                                video_opts['format'] += f"{vs}/"
 
                 with youtube_dl.YoutubeDL(opts) as ydl:
                     meta = ydl.extract_info(youtube_link, download=False)
@@ -196,10 +199,10 @@ class Down:
             if counter:
                 title = f"{counter}. {title}"
 
-            self.video_btn_label = Button(text=y_title, color=(0.18, 0.49, 0.60, 1),
-                                          size_hint_y=None, height=60, halign="left", valign="middle",
-                                          size_hint_x=0.4, font_name='Arial', background_color=(0.17, 0.17, 0.17, 1),
-                                          background_normal='')
+            self.video_btn_label = HoverButton(text=y_title, color=(0.18, 0.49, 0.60, 1),
+                                               size_hint_y=None, height=60, valign="middle",
+                                               size_hint_x=0.4, font_name='Arial',
+                                               background_color=(0.35, 0.35, 0.35, 1))
             self.video_btn_label.bind(size=self.video_btn_label.setter('text_size'))
             self.viewerVideo.height += self.video_btn_label.height * 2
             self.viewerVideo.add_widget(self.video_btn_label)
