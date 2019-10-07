@@ -10,13 +10,15 @@ from pytube.compat import unicode
 from kivy.uix.label import Label
 from HoverButton import HoverButton
 from kivy.uix.image import Image, AsyncImage
-from Str_Converter import convert_vtt_to_srt
+#from Str_Converter import convert_vtt_to_srt
 from functools import partial
+import threading
 import sys
+import bidi.algorithm
 
 
 class Down:
-    def __init__(self, percentage_download_label, viewer_video):
+    def __init__(self, g_speed, viewer_video, status):
         self.folder_path = ''
         self.playlistLen = 0
         self.quality_ids = {2160: [313],
@@ -27,7 +29,7 @@ class Down:
                             360: [243, 134],
                             240: [133, 242],
                             144: [160, 278]}
-        self.percentageDownload_label = percentage_download_label
+        self.g_speed = g_speed
         self.viewerVideo = viewer_video
         self.Quality_label = Label(text="", color=(0.5, 0.5, 0.5, 1),
                                    size_hint_y=None, height=40,
@@ -36,19 +38,29 @@ class Down:
                                       size_hint_y=None,
                                       height=60, halign="right", valign="middle",
                                       size_hint_x=0.06)
+        self.eta_speed = Label()
         self.video_btn_label = HoverButton()
+        self.status = status
 
-    @staticmethod
-    def my_hook(d):
+    def my_hook(self, d):
         try:
             if d['status'] == 'downloading':
-                p = d['downloaded_bytes']/d['total_bytes']*100
-                print(' ')
-                print(f"{round(p,2)}%    {round(d['speed']/1024,2)}KB/S    {d['eta']/60}")
-                #self.percentage_label.text = f"{int(d['speed']/1024)} KB  |  {p} %"
+                if d['speed'] is None:
+                    self.g_speed.text = f"0.0 KB/s"
+                else:
+                    self.g_speed.text = f"{int(d['speed']/1024)} KB/S"
+                if d['eta'] is None:
+                    eta = "--:--"
+                else:
+                    eta = self.format_seconds(d['eta'])
+                self.eta_speed.text = f"{eta} | {self.g_speed.text}"
+                if d['total_bytes'] is None and d['downloaded_bytes'] is None:
+                    percentage = "UnKnown"
+                else:
+                    percentage = round(d['downloaded_bytes']/d['total_bytes']*100, 2)
+                self.percentage_label.text = f"{percentage} %"
             else:
                 print(d['status'])
-                #self.percentage_label.text = f"100 %"
         except Exception as e:
             print(f"\nCan't Hook{{{e}}}Line: {sys.exc_info()[-1].tb_lineno}")
 
@@ -73,11 +85,13 @@ class Down:
             if just_mp3:
                 self.making_viewer_ui(counter, audio_title, f"{self.folder_path}/{audio_name}.mp3", f"{audio_meta['thumbnail']}",
                                       audio_meta['filesize'], audio_meta['filesize'])
+                print("number of characters : ", len(audio_title))
                 self.Quality_label.text = "MP3"
                 if os.path.exists(audio_opts['outtmpl']):
                     os.remove(audio_opts['outtmpl'])
 
             with youtube_dl.YoutubeDL(audio_opts) as ydl:
+                self.status.text = "Downloading Audio"
                 ydl.extract_info(link, download=True)
 
             if just_mp3:
@@ -85,6 +99,7 @@ class Down:
         except Exception as e:
             print(f"Can't download Audio: {e}.\nLine: {sys.exc_info()[-1].tb_lineno}\n"
                   f"Type Error: {type(e).__name__}")
+            self.status.text = "Failed"
             self.video_btn_label.color = (1, 0, 0, 1)
 
     def video_download(self, video_opts="", audio_opts="", video="", counter=0):
@@ -107,11 +122,14 @@ class Down:
                                   video_meta['filesize'], audio_meta['filesize'])
             with youtube_dl.YoutubeDL(video_opts) as ydl:
                 self.Quality_label.text = f"{video_meta['height']}P"
+                self.status.text = "Downloading Video"
                 ydl.extract_info(video, download=True)
             with youtube_dl.YoutubeDL(audio_opts) as ydl:
+                self.status.text = "Downloading Audio"
                 ydl.extract_info(video, download=True)
             if os.path.exists(f"{self.folder_path}/{video_name}.mkv"):
                 os.remove(f"{self.folder_path}/{video_name}.mkv")
+            self.status.text = "Merging Video&Audio"
             MergeVA().merge_va(video_opts['outtmpl'],
                                audio_opts['outtmpl'],
                                f"{self.folder_path}/{video_name}.mkv")
@@ -120,6 +138,7 @@ class Down:
         except Exception as e:
             print(f"Can't download Video/Audio: {e}.\nLine: {sys.exc_info()[-1].tb_lineno}\n"
                   f"Type Error: {type(e).__name__}")
+            self.status.text = "Failed"
             self.video_btn_label.color = (1, 0, 0, 1)
         finally:
             if os.path.exists(video_opts['outtmpl']):
@@ -148,6 +167,7 @@ class Down:
                                 video_opts['format'] += f"{vs}/"
 
                 with youtube_dl.YoutubeDL(opts) as ydl:
+                    self.status.text = "Fetching...."
                     meta = ydl.extract_info(youtube_link, download=False)
                 print(meta['extractor']+'********************************************')
                 if meta['extractor'] == 'youtube':# if u put link video at playlist will download play list not one video
@@ -182,6 +202,7 @@ class Down:
         except Exception as e:
             print(f"Can't Download: {e}.\nLine: {sys.exc_info()[-1].tb_lineno}\n"
                   f"Type Error: {type(e).__name__}")
+            self.status.text = "Failed"
 
     def making_viewer_ui(self, counter, y_title, folder_path, img_url, file_size_v, file_size_a):
         try:
@@ -199,8 +220,11 @@ class Down:
             if counter:
                 title = f"{counter}. {title}"
 
-            self.video_btn_label = HoverButton(text=y_title, color=(0.18, 0.49, 0.60, 1),
-                                               size_hint_y=None, height=60, valign="middle",
+            #reshaped_text = arabic_reshaper.reshape(title)
+            display_text = bidi.algorithm.get_display(title)
+            self.video_btn_label = HoverButton(text=display_text, color=(0.18, 0.49, 0.60, 1),
+                                               size_hint_y=None, height=50,
+                                               valign="middle", halign="center",
                                                size_hint_x=0.4, font_name='Arial',
                                                background_color=(0.35, 0.35, 0.35, 1))
             self.video_btn_label.bind(size=self.video_btn_label.setter('text_size'))
@@ -215,12 +239,12 @@ class Down:
             self.Quality_label.bind(size=self.Quality_label.setter('text_size'))
             self.viewerVideo.add_widget(self.Quality_label)
 
-            self.video_folder = Label(text="", color=(0.18, 0.49, 0.60, 1),
+            self.eta_speed = Label(text="", color=(0.18, 0.49, 0.60, 1),
                                       size_hint_y=None,
-                                      height=60, halign="left", valign="middle",
-                                      size_hint_x=0.1)
-            self.video_folder.bind(size=self.video_folder.setter('text_size'))
-            self.viewerVideo.add_widget(self.video_folder)
+                                      height=60, halign="center", valign="middle",
+                                      size_hint_x=0.14)
+            self.eta_speed.bind(size=self.eta_speed.setter('text_size'))
+            self.viewerVideo.add_widget(self.eta_speed)
 
             if file_size == '0':
                 file_size = "Unknown Size"
@@ -234,8 +258,8 @@ class Down:
             perc = f"0 %"
             self.percentage_label = Label(text=perc, color=(0.18, 0.49, 0.60, 1),
                                           size_hint_y=None,
-                                          height=60, halign="right", valign="middle",
-                                          size_hint_x=0.1)
+                                          height=60, halign="center", valign="middle",
+                                          size_hint_x=0.06)
             self.percentage_label.bind(size=self.percentage_label.setter('text_size'))
             self.viewerVideo.add_widget(self.percentage_label)
         except Exception as e:
@@ -246,7 +270,7 @@ class Down:
     def open_video(self, path, *instance):
         print(f"opening video: {path}")
         if os.path.exists(path):
-            os.startfile(path)
+            threading.Thread(target=os.startfile(path)).start()
 
     @staticmethod
     def filename(s="", max_length=255):
@@ -275,3 +299,14 @@ class Down:
         for i in range(math.ceil(math.log10(self.playlistLen)) - len(str(cnt))):
             cnt_str += '0'
         return cnt_str + str(cnt) + '.'
+
+    @staticmethod
+    def format_seconds(seconds):
+        (mins, secs) = divmod(seconds, 60)
+        (hours, mins) = divmod(mins, 60)
+        if hours > 99:
+            return '--:--:--'
+        if hours == 0:
+            return '%02d:%02d' % (mins, secs)
+        else:
+            return '%02d:%02d:%02d' % (hours, mins, secs)

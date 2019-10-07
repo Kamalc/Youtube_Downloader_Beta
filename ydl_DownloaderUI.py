@@ -30,6 +30,7 @@ Window.clearcolor = (0.17, 0.17, 0.17, 1)
 Window.size = (850, 400)
 Config.set('input', 'mouse', 'mouse,multitouch_on_demand')
 # --------------------------------------------------------
+sys.stdout = open('log', 'w')
 
 
 class HomePage(BoxLayout):
@@ -71,12 +72,19 @@ class HomePage(BoxLayout):
 
         self.play_link = TextInput(multiline=False, size_hint=(1, 0.16))
         self.play_link.hint_text = "Put Url Video or Playlist Here"
-        self.dir_label = Label(text=self.def_directory, size_hint=(1, 0.1), halign='left',
+        self.add_widget(self.play_link)
+
+        self.grid_link_status = GridLayout(cols=3, size_hint=(1, 0.1))
+        self.dir_label = Label(text=self.def_directory, size_hint=(0.75, 1), halign='left',
                                color=(0.22, 0.63, 0.78, 1))
         self.dir_label.bind(size=self.dir_label.setter('text_size'))
-
-        self.add_widget(self.play_link)
-        self.add_widget(self.dir_label)
+        self.status = Label(text="Status", size_hint=(0.2, 1), halign='left',
+                            color=(0.13, 0.83, 0.25, 1))
+        self.grid_link_status.add_widget(self.dir_label)
+        self.grid_link_status.add_widget(Label(text="|", size_hint=(0.05, 1),
+                                               color=(0.22, 0.63, 0.78, 1)))
+        self.grid_link_status.add_widget(self.status)
+        self.add_widget(self.grid_link_status)
 
         self.midGrid = GridLayout(cols=6)
         self.add_widget(self.midGrid)
@@ -137,11 +145,11 @@ class HomePage(BoxLayout):
         self.viewer_header.add_widget(self.name_header_label)
         self.q_header_label = Label(text="Quality", size_hint_x=0.06, color=(0.18, 0.49, 0.60, 1))
         self.viewer_header.add_widget(self.q_header_label)
-        self.dir_header_label = Label(text="ETA", size_hint_x=0.1, color=(0.18, 0.49, 0.60, 1))
+        self.dir_header_label = Label(text="ETA | Speed", size_hint_x=0.14, color=(0.18, 0.49, 0.60, 1))
         self.viewer_header.add_widget(self.dir_header_label)
         self.size_header_label = Label(text="Size", size_hint_x=0.1, color=(0.18, 0.49, 0.60, 1))
         self.viewer_header.add_widget(self.size_header_label)
-        self.per_header_label = Label(text="Percentage", size_hint_x=0.1, color=(0.18, 0.49, 0.60, 1))
+        self.per_header_label = Label(text="  %  ", size_hint_x=0.06, color=(0.18, 0.49, 0.60, 1))
         self.viewer_header.add_widget(self.per_header_label)
         self.add_widget(self.viewer_header)
 
@@ -178,7 +186,7 @@ class HomePage(BoxLayout):
         #self.options_window.cancel_btn.bind(on_release=self.directory_window.dismiss)
         #self.options_window.select_btn.bind(on_release=self.choose_folder)
         # -------------------------------------------------------------
-        self.downloader = Down(self.speed_label, self.viewerVideo)
+        self.downloader = Down(self.speed_label, self.viewerVideo, self.status)
         self.download = BaseThread
         self.paused = False
     # ...............................................................................
@@ -249,6 +257,8 @@ class HomePage(BoxLayout):
         self.quality_min.disabled = False
         self.audio_checker.disabled = False
         self.stop_btn.disabled = True
+        self.status.text = "Status"
+        self.speed_label.text = f"0.0 KB/s"
 
     # ---- Browse Button --------------------
     def choose_directory(self, instance):
