@@ -221,7 +221,7 @@ class Down:
                 title = f"{counter}. {title}"
 
             #reshaped_text = arabic_reshaper.reshape(title)
-            display_text = bidi.algorithm.get_display(title)
+            display_text = bidi.algorithm.get_display(title[0:min(50, len(title))])
             self.video_btn_label = HoverButton(text=display_text, color=(0.18, 0.49, 0.60, 1),
                                                size_hint_y=None, height=50,
                                                valign="middle", halign="center",
