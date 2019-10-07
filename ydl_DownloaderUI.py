@@ -1,8 +1,8 @@
 import os
+import sys
 from threading import Thread
 from kivy.config import Config
 Config.set('graphics', 'resizable', False)
-
 from kivy.app import App
 from kivy.uix.label import Label
 from kivy.uix.button import Button
@@ -23,7 +23,6 @@ from kivy.core.window import Window
 from ydl_Downloader import Down
 from functools import partial
 from MyThread import BaseThread, terminate_thread
-import sys
 
 Window.borderless = 0
 Window.clearcolor = (0.17, 0.17, 0.17, 1)
@@ -63,7 +62,7 @@ class HomePage(BoxLayout):
         self.upperLeftGrid = GridLayout(cols=1, rows=2, size_hint_x=0.2)
         self.speed_header_label = Label(text=f"Speed",
                                         font_size=15, size_hint_y=0.5, color=(0.18, 0.49, 0.60, 1))
-        self.speed_label = Label(text=f"0.0 KB/s",
+        self.speed_label = Label(text=f"_._KB/s",
                                  font_size=20, size_hint_y=0.5, color=(0.22, 0.63, 0.78, 1))
         self.upperLeftGrid.add_widget(self.speed_header_label)
         self.upperLeftGrid.add_widget(self.speed_label)
@@ -79,7 +78,7 @@ class HomePage(BoxLayout):
                                color=(0.22, 0.63, 0.78, 1))
         self.dir_label.bind(size=self.dir_label.setter('text_size'))
         self.status = Label(text="Status", size_hint=(0.2, 1), halign='left',
-                            color=(0.13, 0.83, 0.25, 1))
+                            color=(0.13, 0.83, 0.25, 1), font_size=18)
         self.grid_link_status.add_widget(self.dir_label)
         self.grid_link_status.add_widget(Label(text="|", size_hint=(0.05, 1),
                                                color=(0.22, 0.63, 0.78, 1)))
@@ -258,7 +257,7 @@ class HomePage(BoxLayout):
         self.audio_checker.disabled = False
         self.stop_btn.disabled = True
         self.status.text = "Status"
-        self.speed_label.text = f"0.0 KB/s"
+        self.speed_label.text = f"_._KB/s"
 
     # ---- Browse Button --------------------
     def choose_directory(self, instance):
@@ -419,6 +418,7 @@ class YoutubeDownloader(App):
 
 
 if __name__ == "__main__":
+    #print("size", len("Play With Aki (Mourtada Mansour)#.pt1_long_name_long_name_long_name_long_name_long_name_long_name__"))
     YoutubeDownloader().run()
 
 

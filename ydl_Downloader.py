@@ -45,10 +45,12 @@ class Down:
     def my_hook(self, d):
         try:
             if d['status'] == 'downloading':
+                speed = f"_._KB/s"
                 if d['speed'] is None:
-                    self.g_speed.text = f"0.0 KB/s"
+                    self.g_speed.text = speed
                 else:
-                    self.g_speed.text = f"{int(d['speed']/1024)} KB/S"
+                    speed = self.format_bytes(int(d['speed']))
+                    self.g_speed.text = f"{speed}/s"
                 if d['eta'] is None:
                     eta = "--:--"
                 else:
@@ -216,12 +218,12 @@ class Down:
             icon = AsyncImage(source=img_url, allow_stretch=True, size_hint_x=0.1,
                               size_hint_y=None, height=60)
             self.viewerVideo.add_widget(icon)
-            title = f' {y_title}   '
+            title = f' {y_title}'
             if counter:
                 title = f"{counter}. {title}"
 
             #reshaped_text = arabic_reshaper.reshape(title)
-            display_text = bidi.algorithm.get_display(title[0:min(50, len(title))])
+            display_text = bidi.algorithm.get_display(title[0:min(52, len(title))])
             self.video_btn_label = HoverButton(text=display_text, color=(0.18, 0.49, 0.60, 1),
                                                size_hint_y=None, height=50,
                                                valign="middle", halign="center",
@@ -310,3 +312,17 @@ class Down:
             return '%02d:%02d' % (mins, secs)
         else:
             return '%02d:%02d:%02d' % (hours, mins, secs)
+
+    @staticmethod
+    def format_bytes(bytes):
+        if bytes is None:
+            return 'N/A'
+        if type(bytes) is str:
+            bytes = float(bytes)
+        if bytes == 0.0:
+            exponent = 0
+        else:
+            exponent = int(math.log(bytes, 1024.0))
+        suffix = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'][exponent]
+        converted = float(bytes) / float(1024 ** exponent)
+        return '%.2f%s' % (converted, suffix)
