@@ -1,0 +1,62 @@
+{
+    "Subtitle": {
+        "Arabic": {
+            "Checked": false,
+            "Code": "ar"
+        },
+        "English": {
+            "Checked": false,
+            "Code": "en"
+        },
+        "Spanish": {
+            "Checked": false,
+            "Code": "es"
+        },
+        "Portuguese": {
+            "Checked": false,
+            "Code": "pt"
+        },
+        "Russian": {
+            "Checked": false,
+            "Code": "ru"
+        },
+        "Hindi": {
+            "Checked": false,
+            "Code": "hi"
+        },
+        "Japanese": {
+            "Checked": false,
+            "Code": "ja"
+        },
+        "Chinese": {
+            "Checked": false,
+            "Code": "zh-CN"
+        },
+        "French": {
+            "Checked": false,
+            "Code": "fr"
+        },
+        "German": {
+            "Checked": false,
+            "Code": "de"
+        },
+        "Indonesian": {
+            "Checked": false,
+            "Code": "id"
+        },
+        "Korean": {
+            "Checked": false,
+            "Code": "ko"
+        },
+        "Turkish": {
+            "Checked": false,
+            "Code": "tr"
+        },
+        "Vietnamese": {
+            "Checked": false,
+            "Code": "vi"
+        }
+    },
+    "List Subtitle": [],
+    "Directory (copy)": "D:/download"
+}
