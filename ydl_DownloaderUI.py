@@ -418,7 +418,6 @@ class YoutubeDownloader(App):
 
 
 if __name__ == "__main__":
-    #print("size", len("Play With Aki (Mourtada Mansour)#.pt1_long_name_long_name_long_name_long_name_long_name_long_name__"))
     YoutubeDownloader().run()
 
 

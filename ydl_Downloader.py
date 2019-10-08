@@ -10,7 +10,7 @@ from pytube.compat import unicode
 from kivy.uix.label import Label
 from HoverButton import HoverButton
 from kivy.uix.image import Image, AsyncImage
-#from Str_Converter import convert_vtt_to_srt
+from Str_Converter import convert_vtt_to_srt
 from functools import partial
 import threading
 import sys
@@ -77,7 +77,7 @@ class Down:
         else:
             audio_name = f"{audio_title}"
         audio_opts['outtmpl'] = f"{self.folder_path}/{audio_name}"
-        print(audio_opts['outtmpl'])
+        print(audio_opts['outtmpl'].encode("utf-8"))
         if not just_mp3:
             audio_opts['outtmpl'] += "_a"
 
@@ -86,8 +86,8 @@ class Down:
         try:
             if just_mp3:
                 self.making_viewer_ui(counter, audio_title, f"{self.folder_path}/{audio_name}.mp3", f"{audio_meta['thumbnail']}",
-                                      audio_meta['filesize'], audio_meta['filesize'])
-                print("number of characters : ", len(audio_title))
+                                      audio_meta['filesize'], 0)
+                #print("number of characters : ", len(audio_title))
                 self.Quality_label.text = "MP3"
                 if os.path.exists(audio_opts['outtmpl']):
                     os.remove(audio_opts['outtmpl'])
@@ -104,11 +104,17 @@ class Down:
             self.status.text = "Failed"
             self.video_btn_label.color = (1, 0, 0, 1)
 
-    def video_download(self, video_opts="", audio_opts="", video="", counter=0):
+    def video_download(self, video_opts="", audio_opts="", video="", counter=0, sub_langs=['en']):
         with youtube_dl.YoutubeDL(video_opts) as ydl:
             video_meta = ydl.extract_info(video, download=False)
+            subs = video_meta.get('subtitles', [video_meta])
+            for l in sub_langs:
+                if l not in subs:
+                    sub_langs.remove(l)
+
         with youtube_dl.YoutubeDL(audio_opts) as ydl:
             audio_meta = ydl.extract_info(video, download=False)
+
         video_title = self.filename(video_meta['title'])
         if counter:
             video_name = f"{self.get_cnt(counter)}{video_title}"
@@ -135,6 +141,14 @@ class Down:
             MergeVA().merge_va(video_opts['outtmpl'],
                                audio_opts['outtmpl'],
                                f"{self.folder_path}/{video_name}.mkv")
+            sub_opts = {
+                'writesubtitles': True, 'allsubtitles': False,
+                'skip_download': True,
+            }
+            if sub_langs is not []:
+                with youtube_dl.YoutubeDL(sub_opts) as ydl:
+                    sub_meta = ydl.extract_info(video, download=True)
+
             #convert_vtt_to_srt(sub_vtt)
             self.video_btn_label.color = (0.13, 0.83, 0.25, 1)
         except Exception as e:
@@ -154,20 +168,16 @@ class Down:
             if youtube_link:
                 opts = {}
                 video_opts = {'format': '', 'outtmpl': '', 'progress_hooks': [self.my_hook],
-                              #'writesubtitles': True, 'allsubtitles': False, 'subtitleslangs': ['en']
+                              'writesubtitles': True, 'allsubtitles': False
                               }
-                              # IF auto make writesubtitles to False , 'writeautomaticsub': True}
                 audio_opts = {'format': '250/249/251', 'outtmpl': '', 'progress_hooks': [self.my_hook]}
-
                 if quality_max[-1] == 'p' and quality_min[-1] == 'p':
                     quality_max = int(quality_max[0:-1])
                     quality_min = int(quality_min[0:-1])
-
                     for k, v in self.quality_ids.items():
                         if int(quality_min) <= int(k) <= int(quality_max):
                             for vs in v:
                                 video_opts['format'] += f"{vs}/"
-
                 with youtube_dl.YoutubeDL(opts) as ydl:
                     self.status.text = "Fetching...."
                     meta = ydl.extract_info(youtube_link, download=False)
@@ -182,12 +192,10 @@ class Down:
                     video_list = []
                     video = meta['entries']
                     folder_name = self.filename(meta['title'])
-
                     self.folder_path += folder_name
                     self.create_new_folder(self.folder_path)
                     for k in video:
                         video_list.append(k['webpage_url'])
-
                     self.playlistLen = len(video_list)
                     for video in video_list:
                         try:
@@ -197,7 +205,6 @@ class Down:
                             else:
                                 self.video_download(video_opts=video_opts, audio_opts=audio_opts, video=video,
                                                     counter=counter)
-
                         except Exception as e:
                             print(e)
                         counter += 1
@@ -242,9 +249,9 @@ class Down:
             self.viewerVideo.add_widget(self.Quality_label)
 
             self.eta_speed = Label(text="", color=(0.18, 0.49, 0.60, 1),
-                                      size_hint_y=None,
-                                      height=60, halign="center", valign="middle",
-                                      size_hint_x=0.14)
+                                   size_hint_y=None,
+                                   height=60, halign="center", valign="middle",
+                                   size_hint_x=0.14)
             self.eta_speed.bind(size=self.eta_speed.setter('text_size'))
             self.viewerVideo.add_widget(self.eta_speed)
 
@@ -326,3 +333,6 @@ class Down:
         suffix = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'][exponent]
         converted = float(bytes) / float(1024 ** exponent)
         return '%.2f%s' % (converted, suffix)
+
+    def sub_language(self, lang):
+        lang = "en,ar"
