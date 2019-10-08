@@ -1,11 +1,11 @@
 {
     "Subtitle": {
         "Arabic": {
-            "Checked": false,
+            "Checked": true,
             "Code": "ar"
         },
         "English": {
-            "Checked": false,
+            "Checked": true,
             "Code": "en"
         },
         "Spanish": {
@@ -14,7 +14,11 @@
         },
         "Portuguese": {
             "Checked": false,
-            "Code": "pt"
+            "Code": "pt-PT"
+        },
+        "Portuguese(Brazil)": {
+            "Checked": false,
+            "Code": "pt-BR"
         },
         "Russian": {
             "Checked": false,
@@ -55,8 +59,15 @@
         "Vietnamese": {
             "Checked": false,
             "Code": "vi"
+        },
+        "Hy5o": {
+            "Checked": false,
+            "Code": "vi"
         }
     },
-    "List Subtitle": [],
+    "List Subtitle": [
+        "ar",
+        "en"
+    ],
     "Directory (copy)": "D:/download"
 }

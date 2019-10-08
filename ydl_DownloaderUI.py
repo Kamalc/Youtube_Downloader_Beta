@@ -23,6 +23,7 @@ from kivy.core.window import Window
 from ydl_Downloader import Down
 from functools import partial
 from MyThread import BaseThread, terminate_thread
+from Options import get_list_sub, get_list_sub_codes, update_list_sub
 
 Window.borderless = 0
 Window.clearcolor = (0.17, 0.17, 0.17, 1)
@@ -34,8 +35,7 @@ languages_list = {'Arabic': 'ar', 'English': 'en', 'Spanish': 'es', 'Portuguese'
                   'Russian': 'ru', 'Hindi': 'hi', 'Japanese': 'ja', 'Chinese': 'zh-CN',
                   'French': 'fr', 'German': 'de', 'Indonesian': 'id', 'Korean': 'ko',
                   'Turkish': 'tr', 'Vietnamese': 'vi',
-                  }
-
+                }
 
 class HomePage(BoxLayout):
     def __init__(self, **kwargs):
@@ -195,6 +195,7 @@ class HomePage(BoxLayout):
         self.downloader = Down(self.speed_label, self.viewerVideo, self.status)
         self.download = BaseThread
         self.paused = False
+        self.subtitle_checkboxes = []
     # ...............................................................................
     # # -- Event Functions -- # #
 
@@ -215,11 +216,6 @@ class HomePage(BoxLayout):
             #self.start_download
 
     def start_download(self, instance):
-        ss = self.show_popup_options.grid_subtitle.children
-        subtitle_checkboxes = ss[::2]
-        for i in subtitle_checkboxes:
-            print(i.id, i.active)
-
         if self.audio_checker.active:
             self.quality_max.text = 'Max Quality'
             self.quality_min.text = 'Min Quality'
@@ -293,14 +289,25 @@ class HomePage(BoxLayout):
 
     # ---- Browse Button --------------------
     def open_options(self, instance):
+        ss = self.show_popup_options.grid_subtitle.children
+        self.subtitle_checkboxes = ss[::2]
+        self.subtitle_checkboxes = self.subtitle_checkboxes[::-1]
+        list_lang_check = get_list_sub()
+        for ch, l in zip(self.subtitle_checkboxes, list_lang_check):
+            ch.active = l[1]
         self.options_window.open()
     # # ---- Functions (PopUp Options) ---- # #
 
     def save_options_btn(self, instance):
-        pass
+        lang_check = {}
+        for l in self.subtitle_checkboxes:
+            lang_check[l.id] = l.active
+        update_list_sub(lang_check)
+        self.options_window.dismiss()
 
     def cancel_options_btn(self, instance):
-        pass
+        self.options_window.dismiss()
+
 
 class PopDirectory(BoxLayout):
     def __init__(self, **kwargs):
@@ -374,33 +381,43 @@ class PopOptions(BoxLayout):
 
         self.orientation = 'vertical'
 
-        self.upper_grid = GridLayout(size_hint=(1, 0.1))
+        self.upper_grid = GridLayout(cols=1, size_hint=(1, 0.1))
+        self.upper_grid.add_widget(Label(text="Settings", font_size=25,
+                                         color=(0.18, 0.49, 0.60, 1)))
         self.add_widget(self.upper_grid)
 
-        self.mid_grid = GridLayout(cols=2, rows=5, size_hint_y=0.4, spacing=2, padding=2)
-        self.mid_grid.add_widget(Label(text="Default Directory ", size_hint=(0.4, 0.1)))
+        self.mid_grid = GridLayout(cols=2, rows=3, size_hint_y=0.3, spacing=2, padding=2)
+        self.mid_grid.add_widget(Label(text="Default Directory ", size_hint=(0.4, 0.1),
+                                       color=(0.18, 0.49, 0.60, 1)))
         self.def_dir_text = TextInput(multiline=False, size_hint=(0.4, 0.1), font_size=15)
         self.def_dir_text.hint_text = r"ex:  D://Download/"
         self.mid_grid.add_widget(self.def_dir_text)
-        self.mid_grid.add_widget(Label(text="Subtitles If found ", size_hint=(0.4, 0.1)))
+        self.mid_grid.add_widget(Label(text="Subtitles If found ", size_hint=(0.4, 0.1),
+                                       color=(0.18, 0.49, 0.60, 1)))
         self.def_dir_text = TextInput(multiline=False, size_hint=(0.4, 0.1), font_size=15)
         self.def_dir_text.hint_text = r"ex:  ssssss"
         self.mid_grid.add_widget(self.def_dir_text)
-        self.mid_grid.add_widget(Label(text="Subtitles Languages ", size_hint=(0.4, 0.1)))
+        self.mid_grid.add_widget(Label(text="Subtitles Languages ", size_hint=(0.4, 0.1),
+                                       color=(0.18, 0.49, 0.60, 1)))
         self.def_dir_text = TextInput(multiline=False, size_hint=(0.4, 0.1), font_size=15)
         self.def_dir_text.hint_text = "ex:  en, ar, es, ..., etc"
         self.mid_grid.add_widget(self.def_dir_text)
-        self.mid_grid.add_widget(Label(text="EEXEE UN ", size_hint=(0.4, 0.1)))
-        self.def_dir_text = TextInput(multiline=False, size_hint=(0.4, 0.1), font_size=15)
-        self.def_dir_text.hint_text = r"ex:  ssssss"
-        self.mid_grid.add_widget(self.def_dir_text)
+
         self.add_widget(self.mid_grid)
 
+        self.header_scroll = GridLayout(cols=2, size_hint=(1, 0.1))
+        self.header_scroll.add_widget(Label(text="Subtitle Language", font_size=18,
+                                            color=(0.18, 0.49, 0.60, 1)))
+        self.header_scroll.add_widget(Label(text="xD", font_size=18,
+                                            color=(0.18, 0.49, 0.60, 1)))
+        self.add_widget(self.header_scroll)
+
         self.scroll_language = ScrollView(size_hint=(0.5, 0.4))
-        self.grid_subtitle = GridLayout(cols=2, size_hint=(1, None), spacing=10, height=22*20)
-        for s in languages_list.keys():
-            lang_name = Label(text=s, size_hint_y=None, height=20,)
-            lang_check = CheckBox(id=s, size_hint_y=None, height=20,)
+        size_of_sub_list = (len(get_list_sub()) + 8) * 20
+        self.grid_subtitle = GridLayout(cols=2, size_hint=(1, None), spacing=10, height=size_of_sub_list)
+        for s in get_list_sub():
+            lang_name = Label(text=s[0], size_hint_y=None, height=20, color=(0.22, 0.63, 0.78, 1))
+            lang_check = CheckBox(id=s[0], size_hint_y=None, height=20,)
             self.grid_subtitle.add_widget(lang_name)
             self.grid_subtitle.add_widget(lang_check)
         self.scroll_language.add_widget(self.grid_subtitle)

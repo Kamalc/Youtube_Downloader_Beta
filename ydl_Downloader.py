@@ -15,6 +15,7 @@ from functools import partial
 import threading
 import sys
 import bidi.algorithm
+from Options import get_list_sub_codes
 
 
 class Down:
@@ -104,14 +105,18 @@ class Down:
             self.status.text = "Failed"
             self.video_btn_label.color = (1, 0, 0, 1)
 
-    def video_download(self, video_opts="", audio_opts="", video="", counter=0, sub_langs=['en']):
+    def video_download(self, video_opts="", audio_opts="", video="", counter=0, sub_langs=[]):
+        sub_langs = get_list_sub_codes()
+        print("Languages:")
+        print(sub_langs)
         with youtube_dl.YoutubeDL(video_opts) as ydl:
             video_meta = ydl.extract_info(video, download=False)
             subs = video_meta.get('subtitles', [video_meta])
             for l in sub_langs:
                 if l not in subs:
                     sub_langs.remove(l)
-
+        print("Languages After")
+        print(sub_langs)
         with youtube_dl.YoutubeDL(audio_opts) as ydl:
             audio_meta = ydl.extract_info(video, download=False)
 
@@ -121,9 +126,10 @@ class Down:
         else:
             video_name = f"{video_title}"
 
+        video_opts['writesubtitles'] = False
         video_opts['outtmpl'] = f"{self.folder_path}/{video_name}_v.mkv"
         audio_opts['outtmpl'] = f"{self.folder_path}/{video_name}_a.mp3"
-        sub_vtt = f"{self.folder_path}/{video_name}_v.en.vtt"
+        #sub_vtt = f"{self.folder_path}/{video_name}_v.en.vtt"
         print(video)
         try:
             self.making_viewer_ui(counter, video_title, f"{self.folder_path}/{video_name}.mkv", f"{video_meta['thumbnail']}",
@@ -146,6 +152,9 @@ class Down:
                 'skip_download': True,
             }
             if sub_langs is not []:
+                sub_opts['subtitleslangs'] = sub_langs
+                sub_opts['outtmpl'] = f"{self.folder_path}/{video_name}.vtt"
+                #sub_langs['outtmpl'] = sub_vtt
                 with youtube_dl.YoutubeDL(sub_opts) as ydl:
                     sub_meta = ydl.extract_info(video, download=True)
 
