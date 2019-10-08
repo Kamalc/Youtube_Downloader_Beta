@@ -23,7 +23,7 @@ from kivy.core.window import Window
 from ydl_Downloader import Down
 from functools import partial
 from MyThread import BaseThread, terminate_thread
-from Options import get_list_sub, get_list_sub_codes, update_list_sub
+from Options import get_list_sub, update_list_sub, get_directory,update_directory
 
 Window.borderless = 0
 Window.clearcolor = (0.17, 0.17, 0.17, 1)
@@ -47,7 +47,6 @@ class HomePage(BoxLayout):
         self.directory_window = Popup()
         self.show_popup_directory = PopDirectory()
         self.show_popup_options = PopOptions()
-        self.def_directory = 'D:/download/'
         # ........................................................................
     # UI Design
         self.orientation, self.font_size, self.spacing, self.padding = 'vertical', 15, 5, 5
@@ -79,7 +78,7 @@ class HomePage(BoxLayout):
         self.add_widget(self.play_link)
 
         self.grid_link_status = GridLayout(cols=3, size_hint=(1, 0.1))
-        self.dir_label = Label(text=self.def_directory, size_hint=(0.75, 1), halign='left',
+        self.dir_label = Label(text=get_directory(), size_hint=(0.75, 1), halign='left',
                                color=(0.22, 0.63, 0.78, 1))
         self.dir_label.bind(size=self.dir_label.setter('text_size'))
         self.status = Label(text="Status", size_hint=(0.2, 1), halign='left',
@@ -182,8 +181,8 @@ class HomePage(BoxLayout):
                                       size=(500, 400), title_color=(0.18, 0.49, 0.60, 1))
         self.show_popup_directory.cancel_btn.bind(on_release=self.directory_window.dismiss)
         self.show_popup_directory.select_btn.bind(on_release=self.choose_folder)
-        self.show_popup_directory.path_Text.text = self.def_directory
-        self.show_popup_directory.file_chooser_list.path = self.def_directory
+        self.show_popup_directory.path_Text.text = get_directory()
+        self.show_popup_directory.file_chooser_list.path = get_directory()
 
         self.options_window = Popup(title="Options", content=self.show_popup_options, size_hint=(None, None),
                                     size=(500, 400), title_color=(0.18, 0.49, 0.60, 1))
@@ -237,7 +236,7 @@ class HomePage(BoxLayout):
             print("No input to download")
 
     def download_target(self):
-        self.downloader.download(self.play_link.text, self.def_directory,
+        self.downloader.download(self.play_link.text, get_directory(),
                                  self.quality_max.text, self.quality_min.text,
                                  self.audio_checker)
 
@@ -269,21 +268,21 @@ class HomePage(BoxLayout):
 
     # ---- Browse Button --------------------
     def choose_directory(self, instance):
-        self.show_popup_directory.path_Text.text = self.def_directory
+        self.show_popup_directory.path_Text.text = get_directory()
         self.directory_window.open()
     # # ---- Functions (PopUp Directory) ---- # #
 
-    def path_folder(self, path='D:/download'):
+    """def path_folder(self, path=get_directory()):
         self.def_directory = path
         print(self.def_directory)
-        return self.def_directory
-
+        return get_directory()
+"""
     def choose_folder(self, instance):
         print(self.show_popup_directory.path_Text.text)
         if self.show_popup_directory.path_Text.text:
-            self.path_folder(self.show_popup_directory.path_Text.text)
-            self.def_directory = self.show_popup_directory.path_Text.text
-            self.dir_label.text = self.def_directory
+            #self.path_folder(self.show_popup_directory.path_Text.text)
+            update_directory(self.show_popup_directory.path_Text.text)
+            self.dir_label.text = get_directory()
         self.directory_window.dismiss()
     # ------------------------------------------
 

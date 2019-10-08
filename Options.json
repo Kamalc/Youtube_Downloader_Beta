@@ -1,11 +1,11 @@
 {
     "Subtitle": {
         "Arabic": {
-            "Checked": true,
+            "Checked": false,
             "Code": "ar"
         },
         "English": {
-            "Checked": true,
+            "Checked": false,
             "Code": "en"
         },
         "Spanish": {
@@ -59,15 +59,8 @@
         "Vietnamese": {
             "Checked": false,
             "Code": "vi"
-        },
-        "Hy5o": {
-            "Checked": false,
-            "Code": "vi"
         }
     },
-    "List Subtitle": [
-        "ar",
-        "en"
-    ],
-    "Directory (copy)": "D:/download"
+    "List Subtitle": [],
+    "Directory": "C:\\Users\\Public\\Downloads\\Youtube Downloader\\"
 }

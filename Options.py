@@ -31,3 +31,18 @@ def get_list_sub_codes():
     with open("Options.json", "r+") as my_file:
         json_data = json.load(my_file)
         return json_data['List Subtitle']
+
+
+def get_directory():
+    with open("Options.json", "r+") as my_file:
+        json_data = json.load(my_file)
+        return json_data['Directory']
+
+
+def update_directory(new_dir):
+    with open("Options.json", "r+") as my_file:
+        json_data = json.load(my_file)
+        json_data['Directory'] = new_dir
+        my_file.seek(0)
+        json.dump(json_data, my_file, indent=4)
+        my_file.truncate()
