@@ -30,6 +30,11 @@ Window.size = (850, 400)
 Config.set('input', 'mouse', 'mouse,multitouch_on_demand')
 # --------------------------------------------------------
 sys.stdout = open('log', 'w')
+languages_list = {'Arabic': 'ar', 'English': 'en', 'Spanish': 'es', 'Portuguese': 'pt',
+                  'Russian': 'ru', 'Hindi': 'hi', 'Japanese': 'ja', 'Chinese': 'zh-CN',
+                  'French': 'fr', 'German': 'de', 'Indonesian': 'id', 'Korean': 'ko',
+                  'Turkish': 'tr', 'Vietnamese': 'vi',
+                  }
 
 
 class HomePage(BoxLayout):
@@ -53,7 +58,7 @@ class HomePage(BoxLayout):
         self.upperGrid.size_hint_y = 0.30
 
         self.options_btn = Button(text="Options", size_hint_x=0.2, color=(0.22, 0.63, 0.78, 1))
-        self.options_btn.disabled = True
+        self.options_btn.disabled = False
         self.options_btn.bind(on_release=self.open_options)
         self.upperGrid.add_widget(self.options_btn)
         self.upperGrid.add_widget(Label(text="Youtube Downloader",
@@ -184,6 +189,8 @@ class HomePage(BoxLayout):
                                     size=(500, 400), title_color=(0.18, 0.49, 0.60, 1))
         #self.options_window.cancel_btn.bind(on_release=self.directory_window.dismiss)
         #self.options_window.select_btn.bind(on_release=self.choose_folder)
+        self.show_popup_options.save_btn.bind(on_release=self.save_options_btn)
+        self.show_popup_options.cancel_btn.bind(on_release=self.cancel_options_btn)
         # -------------------------------------------------------------
         self.downloader = Down(self.speed_label, self.viewerVideo, self.status)
         self.download = BaseThread
@@ -208,6 +215,11 @@ class HomePage(BoxLayout):
             #self.start_download
 
     def start_download(self, instance):
+        ss = self.show_popup_options.grid_subtitle.children
+        subtitle_checkboxes = ss[::2]
+        for i in subtitle_checkboxes:
+            print(i.id, i.active)
+
         if self.audio_checker.active:
             self.quality_max.text = 'Max Quality'
             self.quality_min.text = 'Min Quality'
@@ -284,6 +296,11 @@ class HomePage(BoxLayout):
         self.options_window.open()
     # # ---- Functions (PopUp Options) ---- # #
 
+    def save_options_btn(self, instance):
+        pass
+
+    def cancel_options_btn(self, instance):
+        pass
 
 class PopDirectory(BoxLayout):
     def __init__(self, **kwargs):
@@ -360,7 +377,7 @@ class PopOptions(BoxLayout):
         self.upper_grid = GridLayout(size_hint=(1, 0.1))
         self.add_widget(self.upper_grid)
 
-        self.mid_grid = GridLayout(cols=2, rows=8, size_hint_y=0.8, spacing=2, padding=2)
+        self.mid_grid = GridLayout(cols=2, rows=5, size_hint_y=0.4, spacing=2, padding=2)
         self.mid_grid.add_widget(Label(text="Default Directory ", size_hint=(0.4, 0.1)))
         self.def_dir_text = TextInput(multiline=False, size_hint=(0.4, 0.1), font_size=15)
         self.def_dir_text.hint_text = r"ex:  D://Download/"
@@ -377,19 +394,17 @@ class PopOptions(BoxLayout):
         self.def_dir_text = TextInput(multiline=False, size_hint=(0.4, 0.1), font_size=15)
         self.def_dir_text.hint_text = r"ex:  ssssss"
         self.mid_grid.add_widget(self.def_dir_text)
-        self.mid_grid.add_widget(Label(text="EEXEE UN ", size_hint=(0.4, 0.1)))
-        self.def_dir_text = TextInput(multiline=False, size_hint=(0.4, 0.1), font_size=15)
-        self.def_dir_text.hint_text = r"ex:  ssssss"
-        self.mid_grid.add_widget(self.def_dir_text)
-        self.mid_grid.add_widget(Label(text="EEXEE UN ", size_hint=(0.4, 0.1)))
-        self.def_dir_text = TextInput(multiline=False, size_hint=(0.4, 0.1), font_size=15)
-        self.def_dir_text.hint_text = r"ex:  ssssss"
-        self.mid_grid.add_widget(self.def_dir_text)
-        self.mid_grid.add_widget(Label(text="EEXEE UN ", size_hint=(0.4, 0.1)))
-        self.def_dir_text = TextInput(multiline=False, size_hint=(0.4, 0.1), font_size=15)
-        self.def_dir_text.hint_text = r"ex:  ssssss"
-        self.mid_grid.add_widget(self.def_dir_text)
         self.add_widget(self.mid_grid)
+
+        self.scroll_language = ScrollView(size_hint=(0.5, 0.4))
+        self.grid_subtitle = GridLayout(cols=2, size_hint=(1, None), spacing=10, height=22*20)
+        for s in languages_list.keys():
+            lang_name = Label(text=s, size_hint_y=None, height=20,)
+            lang_check = CheckBox(id=s, size_hint_y=None, height=20,)
+            self.grid_subtitle.add_widget(lang_name)
+            self.grid_subtitle.add_widget(lang_check)
+        self.scroll_language.add_widget(self.grid_subtitle)
+        self.add_widget(self.scroll_language)
 
         self.lower_grid = GridLayout(cols=2, rows=1, size_hint_y=0.1, spacing=5, padding=2)
         self.save_btn = HoverButton(text="Save", size_hint=(0.4, 0.1), color=(0.22, 0.63, 0.78, 1)
@@ -418,7 +433,6 @@ class YoutubeDownloader(App):
 
 
 if __name__ == "__main__":
-    #print("size", len("Play With Aki (Mourtada Mansour)#.pt1_long_name_long_name_long_name_long_name_long_name_long_name__"))
     YoutubeDownloader().run()
 
 
