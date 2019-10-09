@@ -30,7 +30,10 @@ def update_list_sub(my_list={}):
 def get_list_sub_codes():
     with open("Options.json", "r+") as my_file:
         json_data = json.load(my_file)
-        return json_data['List Subtitle']
+        if json_data['List Subtitle'] is not None:
+            return json_data['List Subtitle']
+        else:
+            return []
 
 
 def get_directory():

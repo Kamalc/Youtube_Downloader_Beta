@@ -31,11 +31,7 @@ Window.size = (850, 400)
 Config.set('input', 'mouse', 'mouse,multitouch_on_demand')
 # --------------------------------------------------------
 sys.stdout = open('log', 'w')
-languages_list = {'Arabic': 'ar', 'English': 'en', 'Spanish': 'es', 'Portuguese': 'pt',
-                  'Russian': 'ru', 'Hindi': 'hi', 'Japanese': 'ja', 'Chinese': 'zh-CN',
-                  'French': 'fr', 'German': 'de', 'Indonesian': 'id', 'Korean': 'ko',
-                  'Turkish': 'tr', 'Vietnamese': 'vi',
-                }
+
 
 class HomePage(BoxLayout):
     def __init__(self, **kwargs):
@@ -56,7 +52,9 @@ class HomePage(BoxLayout):
         self.upperGrid.cols = 3
         self.upperGrid.size_hint_y = 0.30
 
-        self.options_btn = Button(text="Options", size_hint_x=0.2, color=(0.22, 0.63, 0.78, 1))
+        self.options_btn = HoverButton(text="Settings", size_hint_x=0.2, font_size=25,
+                                       color=(0.22, 0.63, 0.78, 1),
+                                       background_color=(0.35, 0.35, 0.35, 1))
         self.options_btn.disabled = False
         self.options_btn.bind(on_release=self.open_options)
         self.upperGrid.add_widget(self.options_btn)
@@ -168,6 +166,7 @@ class HomePage(BoxLayout):
         self.clear_btn = HoverButton(text="Clear", color=(0.22, 0.63, 0.78, 1)
                                      , background_color=(0.35, 0.35, 0.35, 1))
         self.clear_btn.bind(on_press=self.clear_viewer)
+        self.clear_btn.disabled = True
         self.stop_btn = HoverButton(text="Stop Download", color=(0.22, 0.63, 0.78, 1)
                                     , background_color=(0.35, 0.35, 0.35, 1))
         self.stop_btn.bind(on_release=self.stop_fn_btn)
@@ -184,16 +183,13 @@ class HomePage(BoxLayout):
         self.show_popup_directory.path_Text.text = get_directory()
         self.show_popup_directory.file_chooser_list.path = get_directory()
 
-        self.options_window = Popup(title="Options", content=self.show_popup_options, size_hint=(None, None),
+        self.options_window = Popup(title="Settings", content=self.show_popup_options, size_hint=(None, None),
                                     size=(500, 400), title_color=(0.18, 0.49, 0.60, 1))
-        #self.options_window.cancel_btn.bind(on_release=self.directory_window.dismiss)
-        #self.options_window.select_btn.bind(on_release=self.choose_folder)
         self.show_popup_options.save_btn.bind(on_release=self.save_options_btn)
         self.show_popup_options.cancel_btn.bind(on_release=self.cancel_options_btn)
         # -------------------------------------------------------------
         self.downloader = Down(self.speed_label, self.viewerVideo, self.status)
         self.download = BaseThread
-        self.paused = False
         self.subtitle_checkboxes = []
     # ...............................................................................
     # # -- Event Functions -- # #
@@ -204,15 +200,9 @@ class HomePage(BoxLayout):
         t.start()
 
     def stop_fn_btn(self, instance):
-        #if not self.paused:
-            #self.stop_btn.text = "Resume Download"
-        self.paused = True
         terminate_thread(self.download)
         self.enable_fn()
-        #else:
-            #self.stop_btn.text = "Pause Download"
-            #self.paused = False
-            #self.start_download
+
 
     def start_download(self, instance):
         if self.audio_checker.active:
@@ -244,11 +234,12 @@ class HomePage(BoxLayout):
         clear_viewer = Thread(target=self.viewerVideo.clear_widgets)
         clear_viewer.daemon = True
         clear_viewer.start()
+        self.clear_btn.disabled = True
 
-    def clearing(self):
+    """def clearing(self):
         print(self.viewerVideo.children[:4])
         self.viewerVideo.clear_widgets(self.viewerVideo.children[0:4])
-        #self.viewerVideo.remove_widget(self.viewerVideo.children[:4])
+        #self.viewerVideo.remove_widget(self.viewerVideo.children[:4])"""
 
     def disable_fn(self):
         self.v_download.disabled = True
@@ -256,6 +247,7 @@ class HomePage(BoxLayout):
         self.quality_min.disabled = True
         self.audio_checker.disabled = True
         self.stop_btn.disabled = False
+        self.clear_btn.disabled = True
 
     def enable_fn(self):
         self.v_download.disabled = False
@@ -263,6 +255,7 @@ class HomePage(BoxLayout):
         self.quality_min.disabled = False
         self.audio_checker.disabled = False
         self.stop_btn.disabled = True
+        self.clear_btn.disabled = False
         self.status.text = "Status"
         self.speed_label.text = f"_._KB/s"
 
@@ -380,34 +373,37 @@ class PopOptions(BoxLayout):
 
         self.orientation = 'vertical'
 
-        self.upper_grid = GridLayout(cols=1, size_hint=(1, 0.1))
-        self.upper_grid.add_widget(Label(text="Settings", font_size=25,
-                                         color=(0.18, 0.49, 0.60, 1)))
-        self.add_widget(self.upper_grid)
-
-        self.mid_grid = GridLayout(cols=2, rows=3, size_hint_y=0.3, spacing=2, padding=2)
+        self.mid_grid = GridLayout(cols=2, rows=3, size_hint_y=0.4, spacing=2, padding=2)
         self.mid_grid.add_widget(Label(text="Default Directory ", size_hint=(0.4, 0.1),
                                        color=(0.18, 0.49, 0.60, 1)))
         self.def_dir_text = TextInput(multiline=False, size_hint=(0.4, 0.1), font_size=15)
+        self.def_dir_text.disabled = True
         self.def_dir_text.hint_text = r"ex:  D://Download/"
         self.mid_grid.add_widget(self.def_dir_text)
         self.mid_grid.add_widget(Label(text="Subtitles If found ", size_hint=(0.4, 0.1),
                                        color=(0.18, 0.49, 0.60, 1)))
         self.def_dir_text = TextInput(multiline=False, size_hint=(0.4, 0.1), font_size=15)
+        self.def_dir_text.disabled = True
         self.def_dir_text.hint_text = r"ex:  ssssss"
         self.mid_grid.add_widget(self.def_dir_text)
         self.mid_grid.add_widget(Label(text="Subtitles Languages ", size_hint=(0.4, 0.1),
                                        color=(0.18, 0.49, 0.60, 1)))
         self.def_dir_text = TextInput(multiline=False, size_hint=(0.4, 0.1), font_size=15)
+        self.def_dir_text.disabled = True
         self.def_dir_text.hint_text = "ex:  en, ar, es, ..., etc"
         self.mid_grid.add_widget(self.def_dir_text)
 
         self.add_widget(self.mid_grid)
 
-        self.header_scroll = GridLayout(cols=2, size_hint=(1, 0.1))
-        self.header_scroll.add_widget(Label(text="Subtitle Language", font_size=18,
+        self.header_scroll = GridLayout(cols=3, size_hint=(1, 0.1))
+        self.header_scroll.add_widget(Label(text="Subtitle Language", size_hint_x=0.4,
+                                            font_size=18,
                                             color=(0.18, 0.49, 0.60, 1)))
-        self.header_scroll.add_widget(Label(text="xD", font_size=18,
+        self.checkall_btn = HoverButton(text="All", size_hint_x=0.1,
+                                        color=(0.18, 0.49, 0.60, 1), background_color=(0.35, 0.35, 0.35, 1))
+        self.checkall_btn.bind(on_release=self.checkall_btn_fn)
+        self.header_scroll.add_widget(self.checkall_btn)
+        self.header_scroll.add_widget(Label(text="xD", font_size=18, size_hint_x=0.5,
                                             color=(0.18, 0.49, 0.60, 1)))
         self.add_widget(self.header_scroll)
 
@@ -415,8 +411,8 @@ class PopOptions(BoxLayout):
         size_of_sub_list = (len(get_list_sub()) + 8) * 20
         self.grid_subtitle = GridLayout(cols=2, size_hint=(1, None), spacing=10, height=size_of_sub_list)
         for s in get_list_sub():
-            lang_name = Label(text=s[0], size_hint_y=None, height=20, color=(0.22, 0.63, 0.78, 1))
-            lang_check = CheckBox(id=s[0], size_hint_y=None, height=20,)
+            lang_name = Label(text=s[0], size_hint=(0.8, None), height=20, color=(0.22, 0.63, 0.78, 1))
+            lang_check = CheckBox(id=s[0], size_hint=(0.2, None), height=20,)
             self.grid_subtitle.add_widget(lang_name)
             self.grid_subtitle.add_widget(lang_check)
         self.scroll_language.add_widget(self.grid_subtitle)
@@ -431,6 +427,20 @@ class PopOptions(BoxLayout):
         self.lower_grid.add_widget(self.cancel_btn)
 
         self.add_widget(self.lower_grid)
+        self.allTrue = False
+
+    def checkall_btn_fn(self, instance):
+        chl = self.grid_subtitle.children
+        checklist = chl[::2]
+        for ch in checklist:
+            if not self.allTrue:
+                ch.active = True
+            else:
+                ch.active = False
+        if self.allTrue:
+            self.allTrue = False
+        else:
+            self.allTrue = True
 
 
 class YoutubeDownloader(App):

@@ -109,12 +109,18 @@ class Down:
         sub_langs = get_list_sub_codes()
         print("Languages:")
         print(sub_langs)
-        with youtube_dl.YoutubeDL(video_opts) as ydl:
-            video_meta = ydl.extract_info(video, download=False)
-            subs = video_meta.get('subtitles', [video_meta])
-            for l in sub_langs:
-                if l not in subs:
-                    sub_langs.remove(l)
+        try:
+            with youtube_dl.YoutubeDL(video_opts) as ydl:
+                video_meta = ydl.extract_info(video, download=False)
+                subs = video_meta.get('subtitles', [video_meta])
+                for l in sub_langs:
+                    if l not in subs:
+                        sub_langs.remove(l)
+        except:
+            sub_langs = []
+            video_opts['writesubtitles'] = False
+            with youtube_dl.YoutubeDL(video_opts) as ydl:
+                video_meta = ydl.extract_info(video, download=False)
         print("Languages After")
         print(sub_langs)
         with youtube_dl.YoutubeDL(audio_opts) as ydl:
@@ -151,7 +157,8 @@ class Down:
                 'writesubtitles': True, 'allsubtitles': False,
                 'skip_download': True,
             }
-            if sub_langs is not []:
+            self.video_btn_label.color = (0.13, 0.83, 0.25, 1)
+            if len(sub_langs) > 0:
                 sub_opts['subtitleslangs'] = sub_langs
                 sub_opts['outtmpl'] = f"{self.folder_path}/{video_name}.vtt"
                 #sub_langs['outtmpl'] = sub_vtt
@@ -159,7 +166,6 @@ class Down:
                     sub_meta = ydl.extract_info(video, download=True)
 
             #convert_vtt_to_srt(sub_vtt)
-            self.video_btn_label.color = (0.13, 0.83, 0.25, 1)
         except Exception as e:
             print(f"Can't download Video/Audio: {e}.\nLine: {sys.exc_info()[-1].tb_lineno}\n"
                   f"Type Error: {type(e).__name__}")
