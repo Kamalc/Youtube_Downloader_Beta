@@ -1,11 +1,11 @@
 {
     "Subtitle": {
         "Arabic": {
-            "Checked": false,
+            "Checked": true,
             "Code": "ar"
         },
         "English": {
-            "Checked": false,
+            "Checked": true,
             "Code": "en"
         },
         "Spanish": {
@@ -61,6 +61,11 @@
             "Code": "vi"
         }
     },
-    "List Subtitle": [],
-    "Directory": "C:\\Users\\Public\\Downloads\\Youtube Downloader\\"
+    "List Subtitle": [
+        "ar",
+        "en"
+    ],
+    "Directory": "C:\\Users\\Public\\Downloads\\",
+    "Speed Limit": "0",
+    "Speed Unit": "MB"
 }

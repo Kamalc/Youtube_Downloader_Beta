@@ -14,8 +14,9 @@ from Str_Converter import convert_vtt_to_srt
 from functools import partial
 import threading
 import sys
+from arabic_reshaper import reshape
 import bidi.algorithm
-from Options import get_list_sub_codes
+from Options import get_list_sub_codes, get_actual_speed
 
 
 class Down:
@@ -40,6 +41,8 @@ class Down:
                                       height=60, halign="right", valign="middle",
                                       size_hint_x=0.06)
         self.eta_speed = Label()
+        self.eta = Label()
+        self.speed = Label()
         self.video_btn_label = HoverButton()
         self.status = status
 
@@ -56,7 +59,8 @@ class Down:
                     eta = "--:--"
                 else:
                     eta = self.format_seconds(d['eta'])
-                self.eta_speed.text = f"{eta} | {self.g_speed.text}"
+                self.eta.text = f"{eta}"
+                self.speed.text = f"{self.g_speed.text}"
                 if d['total_bytes'] is None and d['downloaded_bytes'] is None:
                     percentage = "UnKnown"
                 else:
@@ -92,10 +96,11 @@ class Down:
                 self.Quality_label.text = "MP3"
                 if os.path.exists(audio_opts['outtmpl']):
                     os.remove(audio_opts['outtmpl'])
-
+            audio_opts['ratelimit'] = get_actual_speed()
             with youtube_dl.YoutubeDL(audio_opts) as ydl:
                 self.status.text = "Downloading Audio"
                 ydl.extract_info(link, download=True)
+
 
             if just_mp3:
                 self.video_btn_label.color = (0.13, 0.83, 0.25, 1)
@@ -140,10 +145,12 @@ class Down:
         try:
             self.making_viewer_ui(counter, video_title, f"{self.folder_path}/{video_name}.mkv", f"{video_meta['thumbnail']}",
                                   video_meta['filesize'], audio_meta['filesize'])
+            video_opts['ratelimit'] = get_actual_speed()
             with youtube_dl.YoutubeDL(video_opts) as ydl:
                 self.Quality_label.text = f"{video_meta['height']}P"
                 self.status.text = "Downloading Video"
                 ydl.extract_info(video, download=True)
+            audio_opts['ratelimit'] = get_actual_speed()
             with youtube_dl.YoutubeDL(audio_opts) as ydl:
                 self.status.text = "Downloading Audio"
                 ydl.extract_info(video, download=True)
@@ -244,10 +251,10 @@ class Down:
             if counter:
                 title = f"{counter}. {title}"
 
-            #reshaped_text = arabic_reshaper.reshape(title)
-            display_text = bidi.algorithm.get_display(title[0:min(52, len(title))])
+            reshaped_text = reshape(title)
+            display_text = bidi.algorithm.get_display(reshaped_text[0:min(52, len(reshaped_text))])
             self.video_btn_label = HoverButton(text=display_text, color=(0.18, 0.49, 0.60, 1),
-                                               size_hint_y=None, height=50,
+                                               size_hint_y=None, height=50, font_size=16,
                                                valign="middle", halign="center",
                                                size_hint_x=0.4, font_name='Arial',
                                                background_color=(0.35, 0.35, 0.35, 1))
@@ -263,12 +270,19 @@ class Down:
             self.Quality_label.bind(size=self.Quality_label.setter('text_size'))
             self.viewerVideo.add_widget(self.Quality_label)
 
-            self.eta_speed = Label(text="", color=(0.18, 0.49, 0.60, 1),
-                                   size_hint_y=None,
-                                   height=60, halign="center", valign="middle",
-                                   size_hint_x=0.14)
-            self.eta_speed.bind(size=self.eta_speed.setter('text_size'))
-            self.viewerVideo.add_widget(self.eta_speed)
+            self.eta = Label(text="", color=(0.18, 0.49, 0.60, 1),
+                             size_hint_y=None,
+                             height=60, halign="center", valign="middle",
+                             size_hint_x=0.05)
+            self.eta.bind(size=self.eta.setter('text_size'))
+            self.viewerVideo.add_widget(self.eta)
+
+            self.speed = Label(text="", color=(0.18, 0.49, 0.60, 1),
+                               size_hint_y=None,
+                               height=60, halign="center", valign="middle",
+                               size_hint_x=0.09)
+            self.speed.bind(size=self.speed.setter('text_size'))
+            self.viewerVideo.add_widget(self.speed)
 
             if file_size == '0':
                 file_size = "Unknown Size"
