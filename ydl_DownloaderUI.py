@@ -31,7 +31,7 @@ Window.clearcolor = (0.17, 0.17, 0.17, 1)
 Window.size = (850, 400)
 Config.set('input', 'mouse', 'mouse,multitouch_on_demand')
 # --------------------------------------------------------
-sys.stdout = open('log', 'w')
+#sys.stdout = open('log', 'w')
 
 
 class HomePage(BoxLayout):
@@ -202,11 +202,6 @@ class HomePage(BoxLayout):
     # ...............................................................................
     # # -- Event Functions -- # #
 
-    def on_select(self):
-        t = Thread(target=self.stop_btn)
-        t.daemon = True
-        t.start()
-
     def stop_fn_btn(self, instance):
         terminate_thread(self.download)
         self.enable_fn()
@@ -277,15 +272,9 @@ class HomePage(BoxLayout):
         self.directory_window.open()
     # # ---- Functions (PopUp Directory) ---- # #
 
-    """def path_folder(self, path=get_directory()):
-        self.def_directory = path
-        print(self.def_directory)
-        return get_directory()
-"""
     def choose_folder(self, instance):
         print(self.show_popup_directory.path_Text.text)
         if self.show_popup_directory.path_Text.text:
-            #self.path_folder(self.show_popup_directory.path_Text.text)
             update_directory(self.show_popup_directory.path_Text.text)
             self.dir_label.text = get_directory()
         self.directory_window.dismiss()
