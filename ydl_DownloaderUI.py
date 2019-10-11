@@ -31,7 +31,7 @@ Window.clearcolor = (0.17, 0.17, 0.17, 1)
 Window.size = (850, 400)
 Config.set('input', 'mouse', 'mouse,multitouch_on_demand')
 # --------------------------------------------------------
-#sys.stdout = open('log', 'w')
+# sys.stdout = open('log', 'w')
 
 
 class HomePage(BoxLayout):

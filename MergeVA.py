@@ -9,8 +9,7 @@ class MergeVA:
     def merge_va(self, temp_full_video_path, temp_full_audio_path, full_video_path):
         try:
             run([
-                        os.getcwd() + r"\ffmpeg\bin\ffmpeg.exe",
-                        #os.getcwd() + r"\ffmpeg.exe",
+                        os.getcwd() + r"\ffmpeg.exe",
                         "-i",
                         f"{temp_full_video_path}",
                         "-i",

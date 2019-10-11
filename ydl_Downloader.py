@@ -10,11 +10,11 @@ from pytube.compat import unicode
 from kivy.uix.label import Label
 from HoverButton import HoverButton
 from kivy.uix.image import Image, AsyncImage
-from Str_Converter import convert_vtt_to_srt
+#from Str_Converter import convert_vtt_to_srt
 from functools import partial
 import threading
 import sys
-from arabic_reshaper import reshape
+from arabic_reshaper_new import reshape
 import bidi.algorithm
 from Options import get_list_sub_codes, get_actual_speed
 
