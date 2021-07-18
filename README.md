@@ -16,6 +16,7 @@
 - Support Quality 144p - 2160p
 - Support Audio Download as MP3
 - Support Title Arab & Latin Character
+- Support Download Full Playlist Without Length Limit
 
 ### ScreenShots
 ![image](https://user-images.githubusercontent.com/25933847/126058363-fbd399e1-ad39-4626-86f9-bd2631d4273e.png)
